@@ -6,34 +6,19 @@ add_compile_options(-Wfatal-errors -w -O2 -g)
 
 find_package(OpenGL)
 
-project(App)
+project(Game)
 
 add_executable(${PROJECT_NAME}
-    external/glad/src/glad.c
     src/main.cpp
-    game/src/game.cpp
-    engine/src/stb_image.cpp
-    engine/src/renderer.cpp
-    engine/src/entity.cpp
-    engine/src/tile_world.cpp
-    engine/src/camera.cpp
-    engine/src/object.cpp
-    engine/src/model.cpp
-    engine/src/mesh.cpp
-    engine/src/shader.cpp
-    engine/src/audio.cpp
+    src/game.cpp
     )
 
-add_subdirectory(external/assimp)
+    #add_subdirectory(external/assimp)
 
 include_directories(".")
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC engine/include
-    PUBLIC game/include
-    PUBLIC external/glad/include
-    PUBLIC external/glm
-    PUBLIC external/assimp/include
+    PUBLIC include
     )
 
 target_link_directories(${PROJECT_NAME}
