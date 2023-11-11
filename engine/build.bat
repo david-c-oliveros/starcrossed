@@ -15,7 +15,7 @@ SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
 SET includeFlags=-Iinclude\
 SET linkerFlags=-luser32
-SET defines=-D_DEBUG -DEXPORT -D_CRT_SECURE_NO_WARNINGS
+SET defines=-D_DEBUG -DGEXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %assembly%%..."
 g++ %cppFilenames% %compilerFlags% -o ../bin/%assembly%.dll %defines% %includeFlags% %linkerFlags%

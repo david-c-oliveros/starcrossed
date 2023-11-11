@@ -44,18 +44,18 @@
 #endif
 
 
-#ifdef EXPORT
-#error "EXPORT defined"
+#ifdef GEXPORT
+
 #ifdef _MSC_VER
-#define EAPI __declspec(dllexport)
+#define GAPI __declspec(dllexport)
 #else
-#define EAPI __attribute__((visibility("default")))
+#define GAPI __attribute__((visibility("default")))
 #endif
 
 #else
 #ifdef _MSC_VER
-#define EAPI __declspec(dllimport)
+#define GAPI __declspec(dllimport)
 #else
-#define EAPI
+#define GAPI
 #endif
 #endif
