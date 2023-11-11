@@ -4,7 +4,7 @@ SetLocal EnableDelayedExpansion
 
 REM Get a list of all the .cpp files.
 SET cppFilenames=
-FOR /R %%f in (*.cpp) do(
+FOR /R %%f in (*.cpp) do (
     SET cppFilenames=!cppFilenames! %%f
 )
 
