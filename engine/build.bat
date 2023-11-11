@@ -4,13 +4,13 @@ SetLocal EnableDelayedExpansion
 
 REM Get a list of all the .cpp files.
 SET cppFilenames=
-FOR /R %%f in (*.cpp) do (
+FOR /R %%f in (*.cpp) do(
     SET cppFilenames=!cppFilenames! %%f
 )
 
 REM echo "Files:" %cppFilenames%
 
-SET assembly=game
+SET assembly=engine
 SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
 SET includeFlags=-Iinclude\
