@@ -8,7 +8,7 @@ FOR /R %%f in (*.cpp) do (
     SET cppFilenames=!cppFilenames! %%f
 )
 
-REM echo "Files:" %cppFilenames%
+ECHO "Files:" %cppFilenames%
 
 SET assembly=game
 SET compilerFlags=-g
