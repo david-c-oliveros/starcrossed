@@ -46,11 +46,11 @@
 
 #ifdef EXPORT
 
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
 #define API __declspec(dllexport)
-#else
-#define API __attribute__((visibility("default")))
-#endif
+//#else
+//#define API __attribute__((visibility("default")))
+//#endif
 
 #else
 #ifdef _MSC_VER
