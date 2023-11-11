@@ -8,14 +8,14 @@ FOR /R %%f in (*.cpp) do (
     SET cppFilenames=!cppFilenames! %%f
 )
 
-REM echo "Files:" %cppFilenames%
+ECHO "Files:" %cppFilenames%
 
 SET assembly=engine
 SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
 SET includeFlags=-Iinclude\
 SET linkerFlags=-luser32
-SET define=-D_DEBUG -DEXPORT -D_CRT_SECURE_NO_WARNINGS
+SET defines=-D_DEBUG -DEXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %assembly%%..."
 g++ %cppFilenames% %compilerFlags% -o ../bin/%assembly%.dll %defines% %includeFlags% %linkerFlags%
