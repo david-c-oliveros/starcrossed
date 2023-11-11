@@ -3,6 +3,7 @@ tmp
 *.blend
 *.blend1
 CMakeFiles
+cmake
 
 # Audio files
 *.mp3
