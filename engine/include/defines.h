@@ -45,17 +45,17 @@
 
 
 #ifdef EXPORT
-
-//#ifdef _MSC_VER
-#define API __declspec(dllexport)
-//#else
-//#define API __attribute__((visibility("default")))
-//#endif
+#error "EXPORT defined"
+#ifdef _MSC_VER
+#define EAPI __declspec(dllexport)
+#else
+#define EAPI __attribute__((visibility("default")))
+#endif
 
 #else
 #ifdef _MSC_VER
-#define API __declspec(dllimport)
+#define EAPI __declspec(dllimport)
 #else
-#define API
+#define EAPI
 #endif
 #endif
