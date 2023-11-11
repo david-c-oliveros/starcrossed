@@ -11,7 +11,7 @@
 #define PLATFORM_WINDOWS 1
 //#ifndef _WIN64
 //#error "64-bit is required on Windows"
-#endif
+//#endif
 
 #elif defined(__linux__) || defined(__gnu_linux)
 #define PLATFORM_LINUX 1
@@ -20,6 +20,9 @@
 #endif
 
 #elif defined(__unix__)
+#define PLATFORM_UNIX 1
+
+#elif defined(_POSIX_VERSION)
 #define PLATFORM_UNIX 1
 
 #elif __APPLE__
