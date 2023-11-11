@@ -9,12 +9,13 @@ FOR /R %%f in (*.cpp) do (
 )
 
 REM echo "Files:" %cppFilenames%
+
 SET assembly=game
 SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
 SET includeFlags=-Iinclude\
 SET linkerFlags=-luser32
-SET define=-D_DEBUG -DKEXPORT -D_CRT_SECURE_NO_WARNINGS
+SET define=-D_DEBUG -DEXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %assembly%%..."
 g++ %cppFilenames% %compilerFlags% -o ../bin/%assembly%.dll %defines% %includeFlags% %linkerFlags%
