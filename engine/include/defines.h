@@ -9,8 +9,8 @@
 /************************************/
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define PLATFORM_WINDOWS 1
-#ifndef _WIN64
-#error "64-bit is required on Windows"
+//#ifndef _WIN64
+//#error "64-bit is required on Windows"
 #endif
 
 #elif defined(__linux__) || defined(__gnu_linux)
