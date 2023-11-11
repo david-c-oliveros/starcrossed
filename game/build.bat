@@ -1,4 +1,4 @@
-REM Build script for engine
+REM Build script for game
 @ECHO OFF
 SetLocal EnableDelayedExpansion
 
