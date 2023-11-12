@@ -13,7 +13,7 @@ ECHO "Files:" %cppFilenames%
 SET assembly=engine
 SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
-SET includeFlags=-Iinclude\
+SET includeFlags=-Iinclude/
 SET linkerFlags=-luser32
 SET defines=-D_DEBUG -DGEXPORT -D_CRT_SECURE_NO_WARNINGS
 
