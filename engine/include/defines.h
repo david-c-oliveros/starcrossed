@@ -44,10 +44,19 @@
 #endif
 
 
+// Exports
 #ifdef GEXPORT
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 //#define GAPI __declspec(dllexport)
 #define GAPI __attribute__((visibility("default")))
 #else
+#define GAPI
+#endif
+
+// Imports
+#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define GAPI __declspec(dllimport)
+#else
+#define GAPI
 #endif
