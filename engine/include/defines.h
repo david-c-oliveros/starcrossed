@@ -57,6 +57,8 @@
 // Imports
 #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define GAPI __declspec(dllimport)
+#define GCALL __stdcall
 #else
 #define GAPI
+#define GCALL
 #endif
