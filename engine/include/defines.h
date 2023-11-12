@@ -46,7 +46,8 @@
 
 #ifdef GEXPORT
 
-#define GAPI __declspec(dllexport)
+//#define GAPI __declspec(dllexport)
+#define GAPI __attribute__((visibility("default")))
 #else
 #define GAPI __declspec(dllimport)
 #endif
