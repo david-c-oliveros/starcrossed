@@ -1,4 +1,4 @@
-REM Build script for game
+REM Build script for engine
 @ECHO OFF
 SetLocal EnableDelayedExpansion
 
@@ -11,11 +11,11 @@ FOR /R %%f in (*.cpp) do (
 ECHO "Files:" %cppFilenames%
 
 SET assembly=game
-SET compilerFlags=-g
+SET compilerFlags=-g -Wvarargs -Wall -Werror
 REM -Wall -Werror
-SET includeFlags=-Iinclude -I../engine/include/
-SET linkerFlags=-L../bin/ -lengine.lib
-SET defines=-D_DEBUG -DIMPORT
+SET includeFlags=-Iengine/include -Igame/include
+SET linkerFlags=-luser32
+SET defines=-D_DEBUG
 
 ECHO "Building %assembly%%..."
 g++ %cppFilenames% %compilerFlags% -o ../bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%
