@@ -2,6 +2,6 @@
 
 pushd bin
 
-./engine
+./game
 
 popd

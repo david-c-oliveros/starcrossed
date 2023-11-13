@@ -13,9 +13,17 @@ ECHO "Files:" %cppFilenames%
 SET assembly=game
 SET compilerFlags=-g -Wvarargs -Wall -Werror
 REM -Wall -Werror
-SET includeFlags=-Iengine/include -Igame/include
-SET linkerFlags=-luser32
+SET includeFlags=
+-Iengine/include
+-Igame/include
+-Iexternal/glad/include/
+-Iexternal/glfw/include/
+
+SET linkerFlags=
+-luser32
+-Lexternal/glfw/build/src -lglfw
+
 SET defines=-D_DEBUG
 
 ECHO "Building %assembly%%..."
-g++ %cppFilenames% %compilerFlags% -o ../bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%
+g++ %cppFilenames% external/glad/src/glad.c %compilerFlags% -o ../bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%

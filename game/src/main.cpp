@@ -1,10 +1,14 @@
-#include <test.h>
+#include "game.h"
 
+
+Game game((int)(1920 * 1.0), (int)(1080 * 1.0));
 
 
 int main()
 {
-    print_int(42);
+    game.Create();
+
+    while(game.Update()) {}
 
     return 0;
 }
