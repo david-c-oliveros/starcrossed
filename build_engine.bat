@@ -8,8 +8,9 @@ FOR /R %%f in (*.cpp) do (
     SET cppFilenames=!cppFilenames! %%f
 )
 
+SET "topDir=."
 SET tmp=
-FOR /R %%f in (*.cpp) do (
+FOR /R %%f in (' dir /s /a:d "%topDir%\*.cpp"^| find /v "external"') do (
     SET tmp=!tmp! %%f
 )
 
