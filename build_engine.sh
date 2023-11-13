@@ -17,7 +17,8 @@ includeFlags="
 -Iengine/include/
 -Igame/include/
 -Iexternal/glad/include/
--Iexternal/glfw/include
+-Iexternal/glfw/include/
+-Iexternal/glm/
 "
 
 linkerFlags="

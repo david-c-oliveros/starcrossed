@@ -17,7 +17,7 @@ ECHO "Files:" %cppFilenames%
 SET assembly=game
 SET compilerFlags=-g -Wvarargs -Wall -Werror
 REM -Wall -Werror
-SET includeFlags=-Iengine/include -Igame/include -Iexternal/glad/include/ -Iexternal/glfw/include/
+SET includeFlags=-Iengine/include -Igame/include -Iexternal/glad/include/ -Iexternal/glfw/include/ -Iexternal/glm
 
 SET linkerFlags=^
 -luser32^
