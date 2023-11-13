@@ -4,6 +4,7 @@ tmp
 *.blend1
 CMakeFiles
 cmake
+bin
 
 # Audio files
 *.mp3

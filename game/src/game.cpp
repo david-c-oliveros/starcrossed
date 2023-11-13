@@ -2,14 +2,29 @@
 
 
 
+/************************************/
+/*                                  */
+/*        L:Global Variables        */
+/*                                  */
+/************************************/
+float fDeltaTime = 0.0f;
+float fLastFrame = 0.0f;
+
+
+
 void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
 {
+    glViewport(0, 0, nWidth, nHeight);
 }
 
 
 
 void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods)
 {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(pWindow, true);
+    }
 }
 
 
@@ -40,6 +55,8 @@ bool Game::Create()
         return false;
     }
 
+    GLFWConfig();
+
     return true;
 }
 
@@ -67,8 +84,16 @@ void Game::GLFWConfig()
 
 
 
+/**************************/
+/*                        */
+/*        L:Update        */
+/*                        */
+/**************************/
 bool Game::Update()
 {
+    if(glfwWindowShouldClose(pWindow))
+        return false;
+
     RenderGame();
 
     glfwSwapBuffers(pWindow);
@@ -82,4 +107,13 @@ bool Game::Update()
 void Game::RenderGame()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.11f, 1.0f));
+}
+
+
+
+void Game::SetDeltaTime()
+{
+    float fCurFrame = static_cast<float>(glfwGetTime());
+    fDeltaTime = fCurFrame - fLastFrame;
+    fLastFrame = fCurFrame;
 }
