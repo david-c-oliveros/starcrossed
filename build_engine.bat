@@ -3,12 +3,14 @@ REM Build script for engine
 SetLocal EnableDelayedExpansion
 
 REM Get a list of all the .cpp files.
-REM SET cppFilenames=
-REM FOR /R %%f in (*.cpp) do (
-REM     SET cppFilenames=!cppFilenames! %%f
-REM )
+SET cppFilenames=
+FOR /R ./engine %%f in (*.cpp) do (
+    SET cppFilenames=!cppFilenames! %%f
+)
 
-SET cppFilenames="engine/src/*.cpp game/src/*.cpp"
+FOR /R ./game %%f in (*.cpp) do (
+    SET cppFilenames=!cppFilenames! %%f
+)
 
 ECHO "Files:" %cppFilenames%
 
@@ -21,8 +23,8 @@ SET includeFlags=^
 -Iexternal/glad/include/^
 -Iexternal/glfw/include/
 
-SET linkerFlags=
--luser32
+SET linkerFlags=^
+-luser32^
 -Lexternal/glfw/build/src -lglfw
 
 SET defines=-D_DEBUG
