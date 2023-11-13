@@ -17,6 +17,7 @@ class Game
 
         bool Create();
         bool Update();
+        void RenderGame();
 
         void GLFWConfig();
 

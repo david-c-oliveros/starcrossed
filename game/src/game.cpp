@@ -69,5 +69,17 @@ void Game::GLFWConfig()
 
 bool Game::Update()
 {
+    RenderGame();
+
+    glfwSwapBuffers(pWindow);
+    glfwPollEvents();
+
     return true;
+}
+
+
+
+void Game::RenderGame()
+{
+    Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.11f, 1.0f));
 }

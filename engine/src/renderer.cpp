@@ -4,7 +4,8 @@
 
 void Renderer::Clear(glm::vec4 vClearColor)
 {
-    std::cout << "Clearing screen\n";
+    glClearColor(vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
