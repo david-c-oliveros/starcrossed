@@ -3,6 +3,7 @@
 
 #include <renderer.h>
 #include <shader.h>
+#include <texture.h>
 
 
 
@@ -21,6 +22,7 @@ class Game
         void RenderGame();
         void SetDeltaTime();
         void LoadShaders();
+        void LoadTextures();
 
         void GLFWConfig();
 
@@ -29,4 +31,7 @@ class Game
         uint32_t nCanvasWidth;
         uint32_t nCanvasHeight;
         GLFWwindow* pWindow;
+
+        Shader cShader;
+        Texture2D cSpriteTex;
 };

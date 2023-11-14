@@ -10,8 +10,6 @@
 float fDeltaTime = 0.0f;
 float fLastFrame = 0.0f;
 
-Shader cShader;
-
 
 
 void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
@@ -130,5 +128,16 @@ void Game::SetDeltaTime()
 /********************************/
 void Game::LoadShaders()
 {
-    cShader.Create("../shaders/simple_vs.shader", "../shaders/simple_fs.shader");
+    cShader.Create("../shaders/sprite.vert", "../shaders/sprite.frag");
+}
+
+
+
+/*********************************/
+/*                               */
+/*        L:Load Textures        */
+/*                               */
+/*********************************/
+void Game::LoadTextures()
+{
 }

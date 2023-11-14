@@ -10,9 +10,14 @@ void Renderer::Clear(glm::vec4 vClearColor)
 
 
 
-void Renderer::Draw(GLuint &vao, GLuint &vbo, GLuint shader, GLuint nNumVert)
+void Renderer::Draw(GLuint &texID, GLuint &vao, GLuint shader, GLuint nNumVert)
 {
-    std::cout << "Drawing to screen\n";
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texID);
+
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, nNumVert);
+    glBindVertexArray(0);
 }
 
 
