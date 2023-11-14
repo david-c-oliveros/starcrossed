@@ -10,6 +10,8 @@
 float fDeltaTime = 0.0f;
 float fLastFrame = 0.0f;
 
+Shader cShader;
+
 
 
 void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
@@ -56,6 +58,7 @@ bool Game::Create()
     }
 
     GLFWConfig();
+    LoadShaders();
 
     return true;
 }
@@ -116,4 +119,16 @@ void Game::SetDeltaTime()
     float fCurFrame = static_cast<float>(glfwGetTime());
     fDeltaTime = fCurFrame - fLastFrame;
     fLastFrame = fCurFrame;
+}
+
+
+
+/********************************/
+/*                              */
+/*        L:Load Shaders        */
+/*                              */
+/********************************/
+void Game::LoadShaders()
+{
+    cShader.Create("../shaders/simple_vs.shader", "../shaders/simple_fs.shader");
 }

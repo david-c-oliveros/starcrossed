@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <renderer.h>
+#include <shader.h>
 
 
 
@@ -19,6 +20,7 @@ class Game
         bool Update();
         void RenderGame();
         void SetDeltaTime();
+        void LoadShaders();
 
         void GLFWConfig();
 

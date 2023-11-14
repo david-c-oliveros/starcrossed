@@ -28,4 +28,4 @@ SET linkerFlags=^
 SET defines=-D_DEBUG
 
 ECHO "Building %assembly%%..."
-g++ %cppFilenames% external/glad/src/glad.c %compilerFlags% -o bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%
+g++ %cppFilenames% external/glad/src/glad.c %compilerFlags% -o build/bin/%assembly%.exe %defines% %includeFlags% %linkerFlags%
