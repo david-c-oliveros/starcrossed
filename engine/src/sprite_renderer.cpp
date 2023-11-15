@@ -2,10 +2,8 @@
 
 
 
-SpriteRenderer::SpriteRenderer(Shader &shader)
+SpriteRenderer::SpriteRenderer()
 {
-    cShader = shader;
-    initRenderData();
 }
 
 
@@ -13,6 +11,14 @@ SpriteRenderer::SpriteRenderer(Shader &shader)
 SpriteRenderer::~SpriteRenderer()
 {
     glDeleteVertexArrays(1, &nQuadVAO);
+}
+
+
+
+void SpriteRenderer::Create(Shader &shader)
+{
+    cShader = shader;
+    initRenderData();
 }
 
 

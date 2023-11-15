@@ -4,6 +4,7 @@
 #include <renderer.h>
 #include <shader.h>
 #include <texture.h>
+#include <sprite_renderer.h>
 
 
 
@@ -21,8 +22,7 @@ class Game
         bool Update();
         void RenderGame();
         void SetDeltaTime();
-        void LoadShaders();
-        void LoadTextures();
+        void LoadResources();
 
         void GLFWConfig();
 
@@ -34,4 +34,5 @@ class Game
 
         Shader cShader;
         Texture2D cSpriteTex;
+        SpriteRenderer cSpriteRenderer;
 };

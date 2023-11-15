@@ -56,7 +56,7 @@ bool Game::Create()
     }
 
     GLFWConfig();
-    LoadShaders();
+    LoadResources();
 
     return true;
 }
@@ -108,6 +108,8 @@ bool Game::Update()
 void Game::RenderGame()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.11f, 1.0f));
+
+    cSpriteRenderer.DrawSprite(cSpriteTex, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 
@@ -121,23 +123,14 @@ void Game::SetDeltaTime()
 
 
 
-/********************************/
-/*                              */
-/*        L:Load Shaders        */
-/*                              */
-/********************************/
-void Game::LoadShaders()
+/**********************************/
+/*                                */
+/*        L:Load Resources        */
+/*                                */
+/**********************************/
+void Game::LoadResources()
 {
     cShader.Create("../shaders/sprite.vert", "../shaders/sprite.frag");
-}
-
-
-
-/*********************************/
-/*                               */
-/*        L:Load Textures        */
-/*                               */
-/*********************************/
-void Game::LoadTextures()
-{
+    cSpriteTex.Create("res/Texture/TX Player.png", false);
+    cSpriteRenderer.Create(cShader);
 }
