@@ -10,11 +10,9 @@ void Renderer::Clear(glm::vec4 vClearColor)
 
 
 
-void Renderer::Draw(GLuint &texID, GLuint &vao, GLuint shader, GLuint nNumVert)
+void Renderer::Draw(GLuint &vao, Shader shader, GLuint nNumVert)
 {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texID);
-
+    shader.Use();
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, nNumVert);
     glBindVertexArray(0);
@@ -30,6 +28,7 @@ bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // Temporary
 
     *pWindow = glfwCreateWindow(nWidth, nHeight, "Star Crossed", NULL, NULL);
 

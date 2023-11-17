@@ -26,7 +26,6 @@ void SpriteRenderer::Create(Shader &shader)
 void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 position,
                                 glm::vec2 size, float rotate, glm::vec3 color)
 {
-    cShader.Use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
 
@@ -37,10 +36,12 @@ void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 position,
     model = glm::scale(model, glm::vec3(size, 1.0f));
 
     cShader.SetMat4("model", model);
+    cShader.SetVec3f("vSpriteColor", color);
 
-    cShader.SetVec3f("vColor", color);
+    glActiveTexture(GL_TEXTURE0);
+    texture.Bind();
 
-    Renderer::Draw(texture.nID, nQuadVAO, cShader.nID, 4);
+    Renderer::Draw(nQuadVAO, cShader, 6);
 }
 
 
@@ -58,6 +59,7 @@ void SpriteRenderer::initRenderData()
         1.0f, 1.0f, 1.0f, 1.0f,
         1.0f, 0.0f, 1.0f, 0.0f,
     };
+
 
     glGenVertexArrays(1, &nQuadVAO);
     glGenBuffers(1, &nVBO);

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <memory>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include <renderer.h>
 #include <shader.h>
 #include <texture.h>
@@ -23,8 +25,9 @@ class Game
         void RenderGame();
         void SetDeltaTime();
         void LoadResources();
+        void InitDebugTri();
 
-        void GLFWConfig();
+        void GLConfig();
 
 
     public:
@@ -33,6 +36,9 @@ class Game
         GLFWwindow* pWindow;
 
         Shader cShader;
+        Shader cSimpleShader;
         Texture2D cSpriteTex;
         SpriteRenderer cSpriteRenderer;
+
+        glm::mat4 projection;
 };

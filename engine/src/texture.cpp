@@ -51,10 +51,18 @@ void Texture2D::loadTextureFromFile(const char* file, bool alpha)
         nImage_Format = GL_RGBA;
     }
 
-    int32_t width, height, nrChannels;
+    int32_t width = 0;
+    int32_t height = 0;
+    int32_t nrChannels = 0;
+    std::cout << "Reading data at " << file << std::endl;
     uint8_t* data = stbi_load(file, &width, &height, &nrChannels, 0);
+    std::cout << "Image width: " << width << std::endl;
+    std::cout << "Image height: " << height << std::endl;
+    std::cout << "Number of channels: " << nrChannels << std::endl;
     nWidth = width;
     nHeight = height;
 
     generate(data);
+    
+    stbi_image_free(data);
 }

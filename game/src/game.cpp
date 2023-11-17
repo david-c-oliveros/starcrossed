@@ -55,7 +55,7 @@ bool Game::Create()
         return false;
     }
 
-    GLFWConfig();
+    GLConfig();
     LoadResources();
 
     return true;
@@ -68,7 +68,7 @@ bool Game::Create()
 /*        L:GLFW Config        */
 /*                             */
 /*******************************/
-void Game::GLFWConfig()
+void Game::GLConfig()
 {
     glfwSetFramebufferSizeCallback(pWindow, FramebufferSizeCallback);
 //    glfwSetCursorPosCallback(pWindow, MouseCallback);
@@ -81,6 +81,8 @@ void Game::GLFWConfig()
 //    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glViewport(0, 0, 1920, 1080);
 }
 
 
@@ -95,6 +97,7 @@ bool Game::Update()
     if(glfwWindowShouldClose(pWindow))
         return false;
 
+    SetDeltaTime();
     RenderGame();
 
     glfwSwapBuffers(pWindow);
@@ -107,9 +110,23 @@ bool Game::Update()
 
 void Game::RenderGame()
 {
-    Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.11f, 1.0f));
+    Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.21f, 1.0f));
 
-    cSpriteRenderer.DrawSprite(cSpriteTex, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    cSpriteRenderer.DrawSprite(cSpriteTex,
+                               glm::vec2(50.0f, 50.0f),
+                               glm::vec2(100.0f),
+                               0.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f));
+
+    projection = glm::ortho<float>(0.0f, static_cast<float>(nCanvasWidth),
+                                                   static_cast<float>(nCanvasHeight), 0.0f, -1.0f, 1.0f);
+    cShader.SetMat4("projection", projection);
+
+//    cSpriteRenderer.DrawSprite(cSpriteTex,
+//                               glm::vec2(200.0f, 20.0f),
+//                               glm::vec2(300.0f, 400.0f),
+//                               45.0f,
+//                               glm::vec3(1.0f, 0.5f, 1.0f));
 }
 
 
@@ -131,6 +148,9 @@ void Game::SetDeltaTime()
 void Game::LoadResources()
 {
     cShader.Create("../shaders/sprite.vert", "../shaders/sprite.frag");
-    cSpriteTex.Create("res/Texture/TX Player.png", false);
+
+    cSpriteTex.Create("../res/Texture/awesomeface.png", true);
     cSpriteRenderer.Create(cShader);
+
+    cShader.SetInt("sImage", 0);
 }

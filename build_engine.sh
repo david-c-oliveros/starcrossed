@@ -29,5 +29,5 @@ linkerFlags="
 defines="-D_DEBUG"
 
 echo "Building $assembly..."
-echo g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o build/bin/$assembly $defines $includeFlags $linkerFlags
-g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o build/bin/$assembly $defines $includeFlags $linkerFlags
+echo g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
+g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd build/bin
+pushd out/build/bin
 
 ./game
 
