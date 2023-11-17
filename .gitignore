@@ -40,7 +40,6 @@ bin
 
 # Executables
 *.exe
-*.out
 *.app
 
 

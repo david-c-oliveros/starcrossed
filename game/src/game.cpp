@@ -147,9 +147,9 @@ void Game::SetDeltaTime()
 /**********************************/
 void Game::LoadResources()
 {
-    cShader.Create("../shaders/sprite.vert", "../shaders/sprite.frag");
+    cShader.Create("../../shaders/sprite.vert", "../../shaders/sprite.frag");
 
-    cSpriteTex.Create("../res/Texture/awesomeface.png", true);
+    cSpriteTex.Create("../../res/Texture/awesomeface.png", true);
     cSpriteRenderer.Create(cShader);
 
     cShader.SetInt("sImage", 0);
