@@ -7,8 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include <texture.h>
-#include <shader.h>
+#include "texture.h"
+#include "shader.h"
 
 
 

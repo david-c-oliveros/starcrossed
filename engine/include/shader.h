@@ -1,5 +1,4 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -34,5 +33,3 @@ class Shader
         void SetMat3(const std::string &name, glm::mat3 matrix) const;
         void SetMat4(const std::string &name, glm::mat4 matrix) const;
 };
-
-#endif

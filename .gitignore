@@ -5,6 +5,7 @@ tmp
 CMakeFiles
 cmake
 bin
+extra
 
 # Audio files
 *.mp3

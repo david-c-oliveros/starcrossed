@@ -3,10 +3,12 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#include <renderer.h>
-#include <shader.h>
-#include <texture.h>
-#include <sprite_renderer.h>
+#include "renderer.h"
+#include "shader.h"
+#include "texture.h"
+#include "sprite_renderer.h"
+
+#include "world.h"
 
 
 
@@ -38,7 +40,9 @@ class Game
         Shader cShader;
         Shader cSimpleShader;
         Texture2D cSpriteTex;
-        SpriteRenderer cSpriteRenderer;
+        SpriteRenderer cRenderer;
 
         glm::mat4 projection;
+
+        World cWorld;
 };

@@ -8,8 +8,6 @@ mkdir -p ../bin
 # Get a list of all the .cpp files
 cppFilenames=$(find . -type d -path ./external/glm -prune -o -type f -name "*.cpp" -print)
 
-echo "Files:" $cppFilenames
-
 assembly="game"
 compilerFlags="-g -fPIC"
 
