@@ -3,7 +3,7 @@
 
 
 Room::Room(uint32_t nrTiles, glm::ivec2 _vUpperLeft)
-    : vUpperLeft(vUpperLeft)
+    : vUpperLeft(_vUpperLeft)
 {
     for (uint32_t i = 0; i < nrTiles; i++)
     {
