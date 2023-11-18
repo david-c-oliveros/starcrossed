@@ -23,8 +23,8 @@ class Sprite
 
     public:
         Texture2D cTexture;
+        bool bAlphaTex;
         glm::vec2 vSize;
         glm::vec3 vColor;
         float fRotation;
-        bool bAlphaTex;
 };

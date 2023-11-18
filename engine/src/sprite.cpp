@@ -11,7 +11,7 @@ Sprite::Sprite(const char* _sTexFilepath,
     : bAlphaTex(_bAlphaTex),
       vSize(_vSize),
       vColor(_vColor),
-      fRotation(fRotation)
+      fRotation(_fRotation)
 {
     cTexture.Create(_sTexFilepath, bAlphaTex);
 }
