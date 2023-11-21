@@ -16,7 +16,7 @@
 class Tile
 {
     public:
-        Tile(glm::ivec2 coords, const char* _sTexFilepath);
+        Tile(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSize);
         ~Tile();
 
         void Create();
@@ -26,4 +26,5 @@ class Tile
     public:
         std::unique_ptr<Sprite> cSprite;
         glm::vec2 vCoords;
+        glm::vec2 vSize;
 };

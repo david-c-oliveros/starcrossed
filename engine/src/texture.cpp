@@ -59,9 +59,6 @@ void Texture2D::loadTextureFromFile(const char* file, bool alpha)
     if (data == NULL)
         std::cout << "WARNING::File " << file << " not found" << std::endl;
 
-    std::cout << "Image width: " << width << std::endl;
-    std::cout << "Image height: " << height << std::endl;
-    std::cout << "Number of channels: " << nrChannels << std::endl;
     nWidth = width;
     nHeight = height;
 

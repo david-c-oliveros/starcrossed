@@ -119,13 +119,6 @@ void Game::RenderGame()
 
     cShader.SetMat4("projection", projection);
 
-
-    cRenderer.DrawSprite(cSpriteTex,
-                         glm::vec2(50.0f, 50.0f),
-                         glm::vec2(100.0f),
-                         0.0f,
-                         glm::vec3(1.0f, 1.0f, 1.0f));
-
     cWorld.Draw(cRenderer);
 }
 
