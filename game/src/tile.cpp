@@ -2,11 +2,11 @@
 
 
 
-Tile::Tile(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSize)
-    : vCoords(_vCoords), vSize(_vSize)
+Tile::Tile(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSizeScalar)
+    : vCoords(_vCoords), vSizeScalar(_vSizeScalar)
 {
-    cSprite = std::make_unique<Sprite>(_sTexFilepath, true, vSize, DEFAULT_TILE_COLOR, DEFAULT_TILE_ROT);
-    std::cout << "Position in grid: " << glm::to_string(vCoords) << std::endl;
+    // TODO - Move handling of exact coordinates into engine code
+    cSprite = std::make_unique<Sprite>(_sTexFilepath, true, vSizeScalar, DEFAULT_TILE_COLOR, DEFAULT_TILE_ROTATION);
 }
 
 

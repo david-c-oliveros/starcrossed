@@ -3,6 +3,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+
+#include "engine_defines.h"
+
 #include "renderer.h"
 #include "shader.h"
 #include "texture.h"

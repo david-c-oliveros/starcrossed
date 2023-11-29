@@ -1,19 +1,17 @@
-#include <string>
 #include <memory>
 
 #include <glm/glm.hpp>
 
-#include "game_defines.h"
 #include "sprite_renderer.h"
 #include "sprite.h"
 
 
 
-class Tile
+class Entity
 {
     public:
-        Tile(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSizeScalar);
-        ~Tile();
+        Entity(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSizeScalar);
+        ~Entity();
 
         void Create();
         void Draw(SpriteRenderer &cRenderer);

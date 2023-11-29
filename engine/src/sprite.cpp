@@ -4,12 +4,12 @@
 
 Sprite::Sprite(const char* _sTexFilepath,
                bool _bAlphaTex,
-               glm::vec2 _vSize,
+               glm::vec2 _vSizeScalar,
                glm::vec3 _vColor,
                float _fRotation)
 
     : bAlphaTex(_bAlphaTex),
-      vSize(_vSize),
+      vSizeScalar(_vSizeScalar),
       vColor(_vColor),
       fRotation(_fRotation)
 {
@@ -26,5 +26,5 @@ Sprite::~Sprite()
 
 void Sprite::Draw(SpriteRenderer &cRenderer, glm::vec2 vPos)
 {
-    cRenderer.DrawSprite(cTexture, vPos, vSize, fRotation, vColor);
+    cRenderer.DrawSprite(cTexture, vPos, vSizeScalar * BASE_TILE_SIZE, fRotation, vColor);
 }
