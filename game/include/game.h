@@ -17,6 +17,7 @@
 
 void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight);
 void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods);
+void MouseCallback(GLFWwindow* window, double fPosInX, double fPosInY);
 
 
 class Game
@@ -31,6 +32,17 @@ class Game
         void SetDeltaTime();
         void LoadResources();
         void InitDebugTri();
+        void ProcessInput();
+        void DebugAddVec2(const char* str, glm::vec2 vVec);
+        void PrintDebug();
+
+        void ZoomAtScreenPos(const float fDeltaZoom, const glm::ivec2& ivPos);
+        void SetZoom(const float fZoom, const glm::ivec2& ivPos);
+        void StartPan(glm::ivec2& ivPos);
+        void UpdatePan(const glm::ivec2& ivPos);
+        void EndPan(const glm::ivec2& ivPos);
+        glm::ivec2 WorldToScreen(const glm::vec2& vWorldPos) const;
+        glm::vec2 ScreenToWorld(const glm::ivec2& ivScreenPos);
 
         void GLConfig();
 
@@ -46,6 +58,19 @@ class Game
         SpriteRenderer cRenderer;
 
         glm::mat4 projection;
+        glm::mat4 view;
 
         World cWorld;
+
+        glm::vec2 vCameraPos;
+
+        glm::vec2 vWorldOffset;
+        glm::vec2 vWorldScale;
+        glm::vec2 vStartPan;
+
+        bool bPanning = false;
+
+
+    private:
+        std::vector<std::string> vecDebugMessage;
 };

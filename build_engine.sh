@@ -6,7 +6,9 @@ set echo on
 mkdir -p ../bin
 
 # Get a list of all the .cpp files
-cppFilenames=$(find . -type d -path ./external/glm -prune -o -type f -name "*.cpp" -print)
+#cppEngineFilenames=$(find . -type d -path ./external/glm -prune -o -type f -name "*.cpp" -print)
+cppEngineFilenames=$(find engine -type f -name "*.cpp" -print)
+cppGameFilenames=$(find game -type f -name "*.cpp" -print)
 
 assembly="game"
 compilerFlags="-g -fPIC"
@@ -27,5 +29,5 @@ linkerFlags="
 defines="-D_DEBUG"
 
 echo "Building $assembly..."
-echo g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
-g++ $cppFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
+echo g++ $cppGameFilenames $cppEngineFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
+g++ $cppGameFilenames $cppEngineFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
