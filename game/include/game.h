@@ -36,11 +36,12 @@ class Game
         void DebugAddVec2(const char* str, glm::vec2 vVec);
         void PrintDebug();
 
+        void StartPan();
+        void UpdatePan();
+        void EndPan();
+        glm::vec2 GetCursorPos();
         void ZoomAtScreenPos(const float fDeltaZoom, const glm::ivec2& ivPos);
         void SetZoom(const float fZoom, const glm::ivec2& ivPos);
-        void StartPan(glm::ivec2& ivPos);
-        void UpdatePan(const glm::ivec2& ivPos);
-        void EndPan(const glm::ivec2& ivPos);
         glm::ivec2 WorldToScreen(const glm::vec2& vWorldPos) const;
         glm::vec2 ScreenToWorld(const glm::ivec2& ivScreenPos);
 
