@@ -15,11 +15,6 @@
 
 
 
-void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight);
-void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods);
-void MouseCallback(GLFWwindow* window, double fPosInX, double fPosInY);
-
-
 class Game
 {
     public:
@@ -47,6 +42,10 @@ class Game
 
         void GLConfig();
 
+        static void ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset);
+        static void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods);
+        static void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight);
+
 
     public:
         uint32_t nCanvasWidth;
@@ -63,7 +62,7 @@ class Game
 
         World cWorld;
 
-        glm::vec2 vCameraPos;
+        glm::vec3 vCameraPos;
 
         glm::vec2 vWorldOffset;
         glm::vec2 vWorldScale;

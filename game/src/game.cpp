@@ -13,28 +13,13 @@ float fLastFrame = 0.0f;
 glm::vec2 vLastCursorPos = glm::vec2(0.0f);
 glm::vec2 vOffset = glm::vec2(0.0f);
 
-void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
-{
-    glViewport(0, 0, nWidth, nHeight);
-}
-
-
-
-void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(pWindow, true);
-    }
-}
-
 
 
 Game::Game(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
     : nCanvasWidth(_nCanvasWidth), nCanvasHeight(_nCanvasHeight)
 {
     vWorldOffset = glm::vec2(0.0f);
-    vWorldScale  = glm::vec2(1.0f);
+    vWorldScale  = glm::vec2(8.0f);
     vStartPan    = glm::vec2(0.0f);
 }
 
@@ -62,7 +47,7 @@ bool Game::Create()
     GLConfig();
 
     LoadResources();
-    vCameraPos = glm::vec2(0, 0);
+    vCameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
     cWorld.Create();
 
     return true;
@@ -80,9 +65,10 @@ void Game::GLConfig()
     glfwSetFramebufferSizeCallback(pWindow, FramebufferSizeCallback);
 
     glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetWindowUserPointer(pWindow, this);
     glfwSetKeyCallback(pWindow, KeyCallback);
 //    glfwSetCursorPosCallback(pWindow, MouseCallback);
-//    glfwSetScrollCallback(pWindow, ScrollCallback);
+    glfwSetScrollCallback(pWindow, ScrollCallback);
     glfwSetWindowAspectRatio(pWindow, 16, 9);
 
 //    glEnable(GL_DEPTH_TEST);
@@ -132,8 +118,7 @@ void Game::RenderGame()
     projection = glm::ortho<float>(-(fWidth  / 2.0f),  fWidth  / 2.0f,
                                      fHeight / 2.0f, -(fHeight / 2.0f), -1000.0f, 1000.0f);
 
-    glm::vec3 vTransform = glm::vec3(vCameraPos - vWorldOffset, 1.0f);
-    view = glm::lookAt(glm::vec3(vCameraPos, 1.0f), glm::vec3(vCameraPos, 0.0f), glm::vec3(0, 1, 0));
+    view = glm::lookAt(vCameraPos, glm::vec3(vWorldOffset, 0.0f), glm::vec3(0, 1, 0));
 
     cShader.SetMat4("projection", projection);
     cShader.SetMat4("view", view);
@@ -163,6 +148,33 @@ void Game::SetDeltaTime()
 /*        L:Process Mouse Movement        */
 /*                                        */
 /******************************************/
+void Game::StartPan()
+{
+    glm::vec2 vPos = GetCursorPos();
+    bPanning = true;
+    vStartPan = vPos;
+}
+
+
+
+void Game::UpdatePan()
+{
+    glm::vec2 vPos = GetCursorPos();
+
+    vWorldOffset -= (vPos - vStartPan) / vWorldScale;
+    vStartPan = vPos;
+}
+
+
+
+void Game::EndPan()
+{
+    UpdatePan();
+    bPanning = false;
+}
+
+
+
 void Game::ZoomAtScreenPos(const float fDeltaZoom, const glm::ivec2& ivPos)
 {
     glm::vec2 vOffsetBeforeZoom = ScreenToWorld(ivPos);
@@ -180,15 +192,25 @@ void Game::SetZoom(const float fZoom, const glm::ivec2& ivPos)
 
 glm::ivec2 Game::WorldToScreen(const glm::vec2& vWorldPos) const
 {
-    glm::vec2 vFloat = ((vWorldPos - vWorldOffset) * vWorldScale);
-    vFloat = glm::vec2(std::floor(vFloat.x), std::floor(vFloat.y));
+    glm::vec2 vFloatScreenPos = ((vWorldPos - vWorldOffset) * vWorldScale);
+    vFloatScreenPos = glm::vec2(std::floor(vFloatScreenPos.x), std::floor(vFloatScreenPos.y));
 
-    return vFloat;
+    return (glm::vec2)vFloatScreenPos;
 }
 
 glm::vec2 Game::ScreenToWorld(const glm::ivec2& ivScreenPos)
 {
-    return (glm::vec2(ivScreenPos) / vWorldScale);
+    return (GetCursorPos() / vWorldScale) + vWorldOffset;
+}
+
+
+
+glm::vec2 Game::GetCursorPos()
+{
+    glm::dvec2 dvPos;
+    glfwGetCursorPos(pWindow, &dvPos.x, &dvPos.y);
+
+    return glm::vec2(dvPos);
 }
 
 
@@ -229,8 +251,9 @@ void Game::ProcessInput()
     {
         EndPan();
     }
-    vCameraPos = vWorldOffset;
+    vCameraPos = glm::vec3(vWorldOffset, vWorldScale.x);
 }
+
 
 
 
@@ -263,43 +286,6 @@ void Game::PrintDebug()
 
 
 
-void Game::StartPan()
-{
-    glm::vec2 vPos = GetCursorPos();
-    bPanning = true;
-    vStartPan = vPos;
-}
-
-
-
-void Game::UpdatePan()
-{
-    glm::vec2 vPos = GetCursorPos();
-
-    vWorldOffset -= (vPos - vStartPan) / vWorldScale;
-    vStartPan = vPos;
-}
-
-
-
-void Game::EndPan()
-{
-    UpdatePan();
-    bPanning = false;
-}
-
-
-
-glm::vec2 Game::GetCursorPos()
-{
-    glm::dvec2 dvPos;
-    glfwGetCursorPos(pWindow, &dvPos.x, &dvPos.y);
-
-    return glm::vec2(dvPos);
-}
-
-
-
 
 /**************************************/
 /**************************************/
@@ -318,4 +304,40 @@ glm::vec2 Game::GetCursorPos()
 /**********************************/
 void MouseCallback(GLFWwindow* pWindow, double fPosInX, double fPosInY)
 {
+}
+
+
+
+void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods)
+{
+    Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
+
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(pWindow, true);
+    }
+
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        std::cout << "Camera position: " << glm::to_string(pGame->vCameraPos) << std::endl;
+    }
+}
+
+
+
+void Game::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
+{
+    Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
+
+    if (yoffset > 0)
+        pGame->ZoomAtScreenPos(2.0f, pGame->GetCursorPos());
+    else
+        pGame->ZoomAtScreenPos(0.5f, pGame->GetCursorPos());
+}
+
+
+
+void Game::FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
+{
+    glViewport(0, 0, nWidth, nHeight);
 }
