@@ -23,6 +23,7 @@ class Shader
         ~Shader();
 
         void Create(const char* vertexPath, const char* fragmentPath);
+        void Destroy();
         void Use();
         void PrintName();
 

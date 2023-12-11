@@ -27,6 +27,7 @@ class Game
         ~Game();
 
         bool Create();
+        void Destroy();
         bool Update();
         void Shutdown();
         void RenderGame();

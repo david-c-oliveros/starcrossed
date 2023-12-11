@@ -8,7 +8,6 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-    glDeleteProgram(nID);
 }
 
 
@@ -102,6 +101,12 @@ void Shader::Create(const char* vertexPath, const char* fragmentPath)
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+}
+
+
+void Shader::Destroy()
+{
+    glDeleteProgram(nID);
 }
 
 

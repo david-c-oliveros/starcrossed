@@ -24,6 +24,7 @@ Game::Game(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
 
 Game::~Game()
 {
+    glfwTerminate();
 }
 
 
@@ -112,8 +113,8 @@ bool Game::Update()
         return false;
 
     SetDeltaTime();
-    //RenderUI();
     RenderGame();
+    RenderUI();
     ProcessInput();
     PrintDebug();
 
@@ -125,14 +126,17 @@ bool Game::Update()
 
 
 
-void Game::Shutdown()
+void Game::Destroy()
 {
+    cRenderer.Destroy();
+    cShader.Destroy();
+    cSimpleShader.Destroy();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(pWindow);
-    glfwTerminate();
 }
 
 
@@ -353,7 +357,6 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(pWindow, true);
-        pGame->Shutdown();
     }
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)

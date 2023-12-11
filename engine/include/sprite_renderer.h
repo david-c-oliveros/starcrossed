@@ -16,6 +16,7 @@ class SpriteRenderer
         ~SpriteRenderer();
 
         void Create(Shader &shader);
+        void Destroy();
         void DrawSprite(Texture2D &texture,
                         glm::vec2 position,
                         glm::vec2 size = glm::vec2(10.0f, 10.0f),

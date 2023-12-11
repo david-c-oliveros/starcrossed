@@ -10,7 +10,7 @@ int main()
 
     while(game.Update()) {}
     
-    game.Shutdown();
+    game.Destroy();
 
     return 0;
 }
