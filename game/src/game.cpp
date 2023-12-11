@@ -42,6 +42,7 @@ bool Game::Create()
     }
 
     GLConfig();
+    UIConfig();
 
     LoadResources();
     vCameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -79,6 +80,27 @@ void Game::GLConfig()
 
 
 
+/*****************************/
+/*                           */
+/*        L:UI Config        */
+/*                           */
+/*****************************/
+void Game::UIConfig()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(pWindow, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+}
+
+
+
 /**************************/
 /*                        */
 /*        L:Update        */
@@ -90,6 +112,7 @@ bool Game::Update()
         return false;
 
     SetDeltaTime();
+    //RenderUI();
     RenderGame();
     ProcessInput();
     PrintDebug();
@@ -101,6 +124,26 @@ bool Game::Update()
 }
 
 
+
+void Game::Shutdown()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(pWindow);
+    glfwTerminate();
+}
+
+
+
+/**************************/
+/**************************/
+/*                        */
+/*        L:Render        */
+/*                        */
+/**************************/
+/**************************/
 
 /*******************************/
 /*                             */
@@ -124,6 +167,50 @@ void Game::RenderGame()
 
     pWorld->Draw(cRenderer);
 }
+
+
+
+/*****************************/
+/*                           */
+/*        L:Render UI        */
+/*                           */
+/*****************************/
+void Game::RenderUI()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    if (m_bShowUIWindow)
+        ImGui::ShowDemoWindow(&m_bShowUIWindow);
+
+    {
+
+        static float f = 0.0f;
+        static int counter = 0;
+
+        ImGui::Begin("Hello, world!");
+
+        ImGui::Text("This is some useful text.");
+        ImGui::Checkbox("Demo Window", &m_bShowUIWindow);
+
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+        ImGui::ColorEdit3("clear color", (float*)&m_vUIClearColor);
+
+        if (ImGui::Button("Button"))
+            counter++;
+
+        ImGui::SameLine();
+        ImGui::Text("counter = %d", counter);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 
 
 
@@ -230,10 +317,9 @@ void Game::DebugAddVec2(const char* str, glm::vec2 vVec)
 /*******************************/
 void Game::PrintDebug()
 {
-    for (auto sLine : vecDebugMessage)
-    {
-        std::cout << sLine << "\n";
-    }
+//    glm::vec2 vCursorPos = GetCursorPos();
+//    std::cout << "Mouse Pos - Screen: " << glm::to_string(vCursorPos) << " ---- World: "
+//              << glm::to_string(pWorld->ScreenToWorld(vCursorPos)) << "\r" << std::flush;
 }
 
 
@@ -267,11 +353,12 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(pWindow, true);
+        pGame->Shutdown();
     }
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        std::cout << "Camera position: " << glm::to_string(pGame->vCameraPos) << std::endl;
+        pGame->pWorld->SetWorldOffset(glm::vec2(0.0f));
     }
 }
 

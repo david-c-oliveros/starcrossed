@@ -1,8 +1,13 @@
+#pragma once
+
 #include <iostream>
 #include <memory>
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include "engine_defines.h"
 
@@ -23,7 +28,9 @@ class Game
 
         bool Create();
         bool Update();
+        void Shutdown();
         void RenderGame();
+        void RenderUI();
         void SetDeltaTime();
         void LoadResources();
         void InitDebugTri();
@@ -34,6 +41,7 @@ class Game
         glm::vec2 GetCursorPos();
 
         void GLConfig();
+        void UIConfig();
 
         static void ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset);
         static void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods);
@@ -62,4 +70,7 @@ class Game
 
     private:
         std::vector<std::string> vecDebugMessage;
+        const char* glsl_version = "#version 330";
+        ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        bool m_bShowUIWindow;
 };

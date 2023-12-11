@@ -24,7 +24,7 @@ Sprite::~Sprite()
 
 
 
-void Sprite::Draw(SpriteRenderer &cRenderer, glm::vec2 vPos)
+void Sprite::Draw(SpriteRenderer &cRenderer, glm::vec2 vPos, glm::vec2 vScale)
 {
-    cRenderer.DrawSprite(cTexture, vPos, vSizeScalar * BASE_TILE_SIZE, fRotation, vColor);
+    cRenderer.DrawSprite(cTexture, vPos, vScale * BASE_TILE_SIZE, fRotation, vColor);
 }

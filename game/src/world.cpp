@@ -9,27 +9,29 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     m_vPixelScale = vPixelScale;
     m_vRecipPixel = 1.0f / m_vPixelScale;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 1; i++)
     {
         vecRooms.push_back(std::make_unique<Room>(4, glm::ivec2(0, i)));
     }
+
+    // TEMP!!!!!
+    pSprite = std::make_unique<Sprite>("../../res/Texture/awesomeface.png", true);
 
     return true;
 }
 
 
 
-World::~World()
-{
-}
-
-
-
 void World::Draw(SpriteRenderer &cRenderer)
 {
-    for (auto & r : vecRooms)
+//    pTestTile->pSprite->Draw(cRenderer, WorldToScreen(pTestTile->vWorldPos));
+    for (auto &r : vecRooms)
     {
-        r->Draw(cRenderer);
+        for (auto &t : r->vecTiles)
+        {
+            glm::vec2 vTileScreenPos = WorldToScreen((glm::vec2)r->vUpperLeft + t->vWorldPos);
+            pSprite->Draw(cRenderer, vTileScreenPos, m_vWorldScale);
+        }
     }
 }
 

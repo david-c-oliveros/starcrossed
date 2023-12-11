@@ -9,6 +9,8 @@ int main()
     game.Create();
 
     while(game.Update()) {}
+    
+    game.Shutdown();
 
     return 0;
 }

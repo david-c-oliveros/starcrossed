@@ -1,8 +1,22 @@
+#pragma once
+
 #include <vector>
+#include <memory>
 
+#include "game_defines.h"
 #include "sprite_renderer.h"
+#include "sprite.h"
 
-#include "tile.h"
+
+
+struct Tile
+{
+    Tile(glm::ivec2 _vWorldPos)
+        : vWorldPos(_vWorldPos) {}
+
+    glm::vec2 vWorldPos;
+//    glm::vec2 vSizeScalar;
+};
 
 
 
@@ -15,10 +29,9 @@ class Room
 
         ~Room();
 
-        void Draw(SpriteRenderer &cRenderer);
-
 
     public:
+        std::unique_ptr<Sprite> pSprite;
         std::vector<std::unique_ptr<Tile>> vecTiles;
         glm::ivec2 vUpperLeft;
         glm::vec2 vTileSizeScalar;

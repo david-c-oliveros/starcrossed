@@ -1,8 +1,12 @@
+#pragma once
+
 #include <vector>
+#include <memory>
 
+#include "sprite.h"
 #include "sprite_renderer.h"
-
 #include "room.h"
+
 
 
 
@@ -10,7 +14,6 @@ class World
 {
     public:
         World() = default;
-        ~World();
 
         bool Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale = glm::vec2(1.0f));
         void Draw(SpriteRenderer &cRenderer);
@@ -56,4 +59,8 @@ class World
         bool m_bPanning = false;
         glm::vec2 m_vStartPan    = glm::vec2(0.0f);
         glm::ivec2 m_vViewArea;
+
+
+        // TEMP!!!
+        std::unique_ptr<Sprite> pSprite;
 };

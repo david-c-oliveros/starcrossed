@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <memory>
 
@@ -19,7 +21,7 @@ class Sprite
 
         ~Sprite();
 
-        void Draw(SpriteRenderer &cRenderer, glm::vec2 vPos);
+        void Draw(SpriteRenderer &cRenderer, glm::vec2 vPos, glm::vec2 vScale);
 
 
     public:

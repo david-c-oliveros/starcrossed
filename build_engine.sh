@@ -9,6 +9,12 @@ mkdir -p ../bin
 #cppEngineFilenames=$(find . -type d -path ./external/glm -prune -o -type f -name "*.cpp" -print)
 cppEngineFilenames=$(find engine -type f -name "*.cpp" -print)
 cppGameFilenames=$(find game -type f -name "*.cpp" -print)
+cppExternalFilenames="
+external/glad/src/glad.c
+external/imgui/backends/imgui_impl_glfw.cpp
+external/imgui/backends/imgui_impl_opengl3.cpp
+external/imgui/imgui*.cpp
+"
 
 assembly="game"
 compilerFlags="-g -fPIC"
@@ -19,6 +25,8 @@ includeFlags="
 -Iexternal/glad/include/
 -Iexternal/glfw-3.3.8/include/
 -Iexternal/glm/
+-Iexternal/imgui/
+-Iexternal/imgui/backends/
 "
 
 linkerFlags="
@@ -29,5 +37,5 @@ linkerFlags="
 defines="-D_DEBUG"
 
 echo "Building $assembly..."
-echo g++ $cppGameFilenames $cppEngineFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
-g++ $cppGameFilenames $cppEngineFilenames external/glad/src/glad.c $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
+echo g++ $cppGameFilenames $cppEngineFilenames $cppExternalFilenames $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
+g++ $cppGameFilenames $cppEngineFilenames $cppExternalFilenames $compilerFlags -o out/build/bin/$assembly $defines $includeFlags $linkerFlags
