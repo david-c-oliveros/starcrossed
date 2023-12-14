@@ -16,7 +16,7 @@ class World
         World() = default;
 
         bool Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale = glm::vec2(1.0f));
-        void Draw(SpriteRenderer &cRenderer);
+        void Draw(SpriteRenderer &cRenderer, glm::vec2 vDebugPos);
 
         void SetWorldOffset(const glm::vec2& vOffset);
         void MoveWorldOffset(const glm::vec2& vDeltaOffset);
@@ -49,7 +49,7 @@ class World
     public:
         std::vector<std::unique_ptr<Room>> vecRooms;
 
-        std::unique_ptr<Tile> pTestTile;
+        std::vector<std::string> vecDebugInfo = std::vector<std::string>(10);
 
     private:
         glm::vec2 m_vWorldOffset = glm::vec2(0.0f);

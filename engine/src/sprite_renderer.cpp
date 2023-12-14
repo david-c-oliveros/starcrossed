@@ -16,6 +16,7 @@ SpriteRenderer::~SpriteRenderer()
 
 void SpriteRenderer::Create(Shader &shader)
 {
+    vecDebugInfo = { "SpriteRenderer", "" };
     cShader = shader;
     initRenderData();
 }

@@ -1,9 +1,13 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <game_defines.h>
 #include <texture.h>
 #include <shader.h>
 
@@ -22,6 +26,10 @@ class SpriteRenderer
                         glm::vec2 size = glm::vec2(10.0f, 10.0f),
                         float rotate = 0.0f,
                         glm::vec3 color = glm::vec3(1.0f));
+
+
+    public:
+        std::vector<std::string> vecDebugInfo;
 
 
     private:

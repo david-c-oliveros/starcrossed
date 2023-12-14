@@ -8,10 +8,11 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     SetWorldScale(vPixelScale);
     m_vPixelScale = vPixelScale;
     m_vRecipPixel = 1.0f / m_vPixelScale;
+    vecDebugInfo[0] = "World";
 
     for (int i = 0; i < 1; i++)
     {
-        vecRooms.push_back(std::make_unique<Room>(4, glm::ivec2(0, i)));
+        vecRooms.push_back(std::make_unique<Room>(1, glm::ivec2(0, i)));
     }
 
     // TEMP!!!!!
@@ -22,17 +23,32 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
 
 
 
-void World::Draw(SpriteRenderer &cRenderer)
+void World::Draw(SpriteRenderer &cRenderer, glm::vec2 vDebugPos)
 {
 //    pTestTile->pSprite->Draw(cRenderer, WorldToScreen(pTestTile->vWorldPos));
-    for (auto &r : vecRooms)
-    {
-        for (auto &t : r->vecTiles)
-        {
-            glm::vec2 vTileScreenPos = WorldToScreen((glm::vec2)r->vUpperLeft + t->vWorldPos);
-            pSprite->Draw(cRenderer, vTileScreenPos, m_vWorldScale);
-        }
-    }
+
+    glm::vec2 vFirstTileWorld = vecRooms[0]->vecTiles[0]->vWorldPos;
+    glm::vec2 vFirstTileScreen = WorldToScreen(vFirstTileWorld);
+
+    vecDebugInfo[1] = "World Offset: " + glm::to_string(m_vWorldOffset);
+    vecDebugInfo[2] = "vFirstTileWorld: " + glm::to_string(vFirstTileWorld);
+    vecDebugInfo[3] = "vFirstTileScreen: " + glm::to_string(vFirstTileScreen);
+    vecDebugInfo[4] = "vWorldScale: " + glm::to_string(m_vWorldScale);
+
+    glm::vec2 vScalar = BASE_TILE_SIZE * m_vWorldScale;
+    pSprite->Draw(cRenderer, vFirstTileScreen, vScalar);
+
+//    for (auto &r : vecRooms)
+//    {
+//        for (auto &t : r->vecTiles)
+//        {
+//            glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
+//            //pSprite->Draw(cRenderer, vTileScreenPos, m_vWorldScale);
+//            glm::vec2 vScalar = BASE_TILE_SIZE * m_vRecipPixel * m_vWorldScale;
+//            pSprite->Draw(cRenderer, vFirstTileScreen, vScalar);
+//            vecDebugInfo[6] = "Scalar passed to renderer: " + glm::to_string(vScalar);
+//        }
+//    }
 }
 
 

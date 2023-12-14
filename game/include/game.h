@@ -34,8 +34,10 @@ class Game
         void RenderUI();
         void SetDeltaTime();
         void LoadResources();
-        void InitDebugTri();
+
         void ProcessInput();
+        void ProcessMouseInput();
+
         void DebugAddVec2(const char* str, glm::vec2 vVec);
         void PrintDebug();
 
@@ -64,14 +66,17 @@ class Game
 
         std::unique_ptr<World> pWorld;
 
-        glm::vec3 vCameraPos;
-
         bool bPanning = false;
 
 
     private:
         std::vector<std::string> vecDebugMessage;
         const char* glsl_version = "#version 330";
+
+        ImGuiIO io;
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         bool m_bShowUIWindow;
+        bool m_bShowDebugInfo = true;
+
+        glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
 };

@@ -46,7 +46,6 @@ bool Game::Create()
     UIConfig();
 
     LoadResources();
-    vCameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
 
     pWorld = std::make_unique<World>();
     pWorld->Create(glm::ivec2(32, 32), glm::vec2(1.0f));
@@ -76,7 +75,7 @@ void Game::GLConfig()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glViewport(0, 0, 1920, 1080);
+    glViewport(0, 0, nCanvasWidth, nCanvasHeight);
 }
 
 
@@ -90,7 +89,8 @@ void Game::UIConfig()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
@@ -161,15 +161,16 @@ void Game::RenderGame()
     float fWidth  = static_cast<float>(nCanvasWidth);
     float fHeight = static_cast<float>(nCanvasHeight);
 
-    projection = glm::ortho<float>(-(fWidth  / 2.0f),  fWidth  / 2.0f,
-                                     fHeight / 2.0f, -(fHeight / 2.0f), -1000.0f, 1000.0f);
+    projection = glm::ortho<float>(0.0f, fWidth, fHeight, 0.0f, -1000.0f, 1000.0f);
 
-    view = glm::lookAt(vCameraPos, glm::vec3(pWorld->GetWorldOffset(), 0.0f), glm::vec3(0, 1, 0));
+    glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 vOrigin = glm::vec3(0.0f);
+    view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
 
     cShader.SetMat4("projection", projection);
     cShader.SetMat4("view", view);
 
-    pWorld->Draw(cRenderer);
+    pWorld->Draw(cRenderer, pWorld->ScreenToWorld(GetCursorPos()));
 }
 
 
@@ -207,7 +208,26 @@ void Game::RenderUI()
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+    }
+
+    if (m_bShowDebugInfo)
+    {
+        std::string sCursorWorldPos = "Cursor World Pos: " + glm::to_string(pWorld->ScreenToWorld(GetCursorPos()));
+        std::string sCursorMoveDelta = "Cursor Move Delta: " + glm::to_string(m_vCursorMoveDelta);
+
+        ImGui::Begin("Debug");
+
+        for (auto &s : pWorld->vecDebugInfo)
+            ImGui::Text(s.c_str());
+
+        for (auto &s : cRenderer.vecDebugInfo)
+            ImGui::Text(s.c_str());
+
+        ImGui::Text(sCursorWorldPos.c_str());
+        ImGui::Text(sCursorMoveDelta.c_str());
+
         ImGui::End();
     }
 
@@ -275,15 +295,25 @@ void Game::LoadResources()
 /*********************************/
 void Game::ProcessInput()
 {
+    if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
+        ProcessMouseInput();
+}
+
+
+
+void Game::ProcessMouseInput()
+{
     glm::vec2 vPos = GetCursorPos();
     if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         if (bPanning)
         {
             pWorld->UpdatePan(vPos);
+            m_vCursorMoveDelta += pWorld->ScreenToWorld(vPos);
         }
         else
         {
+            m_vCursorMoveDelta = glm::vec2(0.0f);
             pWorld->StartPan(vPos);
             bPanning = true;
         }
@@ -294,7 +324,6 @@ void Game::ProcessInput()
         pWorld->EndPan(vPos);
         bPanning = false;
     }
-    vCameraPos = glm::vec3(pWorld->GetWorldOffset(), pWorld->GetWorldScale().x);
 }
 
 
