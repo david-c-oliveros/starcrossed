@@ -12,10 +12,11 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
 
     for (int i = 0; i < 1; i++)
     {
-        vecRooms.push_back(std::make_unique<Room>(1, glm::ivec2(0, i)));
+        vecRooms.push_back(std::make_unique<Room>(glm::ivec2(4, 16), glm::ivec2(0, i)));
     }
 
     // TEMP!!!!!
+    pSpriteGrass = std::make_unique<Sprite>("../../res/Texture/TX Tileset Grass.png", true);
     pSprite = std::make_unique<Sprite>("../../res/Texture/awesomeface.png", true);
 
     return true;
@@ -25,30 +26,24 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
 
 void World::Draw(SpriteRenderer &cRenderer, glm::vec2 vDebugPos)
 {
-//    pTestTile->pSprite->Draw(cRenderer, WorldToScreen(pTestTile->vWorldPos));
+//    glm::vec2 vFirstTileWorld = vecRooms[0]->vecTiles[0]->vWorldPos;
+//    glm::vec2 vFirstTileScreen = WorldToScreen(vFirstTileWorld);
 
-    glm::vec2 vFirstTileWorld = vecRooms[0]->vecTiles[0]->vWorldPos;
-    glm::vec2 vFirstTileScreen = WorldToScreen(vFirstTileWorld);
+//    vecDebugInfo[1] = "World Offset: " + glm::to_string(m_vWorldOffset);
+//    vecDebugInfo[2] = "vFirstTileWorld: " + glm::to_string(vFirstTileWorld);
+//    vecDebugInfo[3] = "vFirstTileScreen: " + glm::to_string(vFirstTileScreen);
+//    vecDebugInfo[4] = "vWorldScale: " + glm::to_string(m_vWorldScale);
 
-    vecDebugInfo[1] = "World Offset: " + glm::to_string(m_vWorldOffset);
-    vecDebugInfo[2] = "vFirstTileWorld: " + glm::to_string(vFirstTileWorld);
-    vecDebugInfo[3] = "vFirstTileScreen: " + glm::to_string(vFirstTileScreen);
-    vecDebugInfo[4] = "vWorldScale: " + glm::to_string(m_vWorldScale);
+    for (auto &r : vecRooms)
+    {
+        for (auto &t : r->vecTiles)
+        {
+            glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
+            glm::vec2 vScalar = BASE_TILE_SIZE * m_vWorldScale;
 
-    glm::vec2 vScalar = BASE_TILE_SIZE * m_vWorldScale;
-    pSprite->Draw(cRenderer, vFirstTileScreen, vScalar);
-
-//    for (auto &r : vecRooms)
-//    {
-//        for (auto &t : r->vecTiles)
-//        {
-//            glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
-//            //pSprite->Draw(cRenderer, vTileScreenPos, m_vWorldScale);
-//            glm::vec2 vScalar = BASE_TILE_SIZE * m_vRecipPixel * m_vWorldScale;
-//            pSprite->Draw(cRenderer, vFirstTileScreen, vScalar);
-//            vecDebugInfo[6] = "Scalar passed to renderer: " + glm::to_string(vScalar);
-//        }
-//    }
+            pSpriteGrass->Draw(cRenderer, vTileScreenPos, vScalar);
+        }
+    }
 }
 
 

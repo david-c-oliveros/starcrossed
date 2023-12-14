@@ -23,7 +23,7 @@ struct Tile
 class Room
 {
     public:
-        Room(uint32_t nrTiles = 1,
+        Room(glm::ivec2 vDim,
              glm::ivec2 _vUpperLeft = glm::ivec2(0),
              glm::vec2 _vTileSizeScalar = glm::vec2(1.0f));
 

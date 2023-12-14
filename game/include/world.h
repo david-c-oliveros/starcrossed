@@ -62,5 +62,6 @@ class World
 
 
         // TEMP!!!
+        std::unique_ptr<Sprite> pSpriteGrass;
         std::unique_ptr<Sprite> pSprite;
 };

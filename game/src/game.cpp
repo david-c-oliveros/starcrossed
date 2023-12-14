@@ -47,6 +47,11 @@ bool Game::Create()
 
     LoadResources();
 
+
+    glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 vOrigin = glm::vec3(0.0f);
+    view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
+
     pWorld = std::make_unique<World>();
     pWorld->Create(glm::ivec2(32, 32), glm::vec2(1.0f));
 
@@ -163,12 +168,8 @@ void Game::RenderGame()
 
     projection = glm::ortho<float>(0.0f, fWidth, fHeight, 0.0f, -1000.0f, 1000.0f);
 
-    glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
-    glm::vec3 vOrigin = glm::vec3(0.0f);
-    view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
-
-    cShader.SetMat4("projection", projection);
     cShader.SetMat4("view", view);
+    cShader.SetMat4("projection", projection);
 
     pWorld->Draw(cRenderer, pWorld->ScreenToWorld(GetCursorPos()));
 }
@@ -280,7 +281,6 @@ void Game::LoadResources()
 {
     cShader.Create("../../shaders/sprite.vert", "../../shaders/sprite.frag");
 
-    cSpriteTex.Create("../../res/Texture/awesomeface.png", true);
     cRenderer.Create(cShader);
 
     cShader.SetInt("sImage", 0);
