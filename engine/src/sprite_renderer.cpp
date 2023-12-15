@@ -2,8 +2,10 @@
 
 
 
-SpriteRenderer::SpriteRenderer()
+SpriteRenderer::SpriteRenderer(Shader &shader)
 {
+    cShader = shader;
+    initRenderData();
 }
 
 

@@ -4,9 +4,9 @@
 #include <fstream>
 #include <sstream>
 
-#ifndef __EMSCRIPTEN__
+#include <string>
+
 #include <glad/glad.h>
-#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,14 +16,11 @@ class Shader
 {
     public:
         uint32_t nID;
-        const char* vertexName;
-        const char* fragmentName;
 
         Shader();
         ~Shader();
 
-        void Create(const char* vertexPath, const char* fragmentPath);
-        void Destroy();
+        void Compile(const char* sVertexSource, const char* sFragmentSource, const char* sGeometrySource);
         void Use();
         void PrintName();
 
@@ -33,4 +30,8 @@ class Shader
         void SetVec3f(const std::string &name, glm::vec3 vec) const;
         void SetMat3(const std::string &name, glm::mat3 matrix) const;
         void SetMat4(const std::string &name, glm::mat4 matrix) const;
+
+
+    private:
+        void checkCompileErrors(unsigned int nObject, std::string sType);
 };

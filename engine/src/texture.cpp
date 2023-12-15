@@ -8,15 +8,7 @@ Texture2D::Texture2D()
       nWrap_S(GL_REPEAT), nWrap_T(GL_REPEAT),
       nFilter_Min(GL_LINEAR), nFilter_Max(GL_LINEAR)
 {
-}
-
-
-
-void Texture2D::Create(const char* file, bool alpha)
-{
     glGenTextures(1, &nID);
-
-    loadTextureFromFile(file, alpha);
 }
 
 
@@ -28,10 +20,13 @@ void Texture2D::Bind() const
 
 
 
-void Texture2D::generate(uint8_t* data)
+void Texture2D::Generate(uint8_t* pData, uint32_t _nWidth, uint32_t _nHeight)
 {
+    nWidth = _nWidth;
+    nHeight = _nHeight;
+
     glBindTexture(GL_TEXTURE_2D, nID);
-    glTexImage2D(GL_TEXTURE_2D, 0, nInternal_Format, nWidth, nHeight, 0, nImage_Format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, nInternal_Format, nWidth, nHeight, 0, nImage_Format, GL_UNSIGNED_BYTE, pData);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, nWrap_S);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, nWrap_T);
@@ -39,30 +34,4 @@ void Texture2D::generate(uint8_t* data)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, nFilter_Max);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-
-
-void Texture2D::loadTextureFromFile(const char* file, bool alpha)
-{
-    if (alpha)
-    {
-        nInternal_Format = GL_RGBA;
-        nImage_Format = GL_RGBA;
-    }
-
-    int32_t width = 0;
-    int32_t height = 0;
-    int32_t nrChannels = 0;
-    uint8_t* data = stbi_load(file, &width, &height, &nrChannels, 0);
-
-    if (data == NULL)
-        std::cout << "WARNING::File " << file << " not found" << std::endl;
-
-    nWidth = width;
-    nHeight = height;
-
-    generate(data);
-    
-    stbi_image_free(data);
 }

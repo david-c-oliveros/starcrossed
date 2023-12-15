@@ -2,8 +2,8 @@
 
 
 
-Entity::Entity(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSizeScalar)
-    : vCoords(_vCoords), vSizeScalar(_vSizeScalar)
+Entity::Entity(std::string _sTexName, glm::ivec2 _vCoords)
+    : vCoords(_vCoords)
 {
-    cSprite = std::make_unique<Sprite>(_sTexFilepath, true, vSizeScalar, glm::vec3(1.0f), 0.0f);
+    pSprite = std::make_unique<Sprite>(_sTexName, glm::vec3(1.0f), 0.0f);
 }

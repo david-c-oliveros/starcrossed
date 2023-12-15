@@ -16,7 +16,7 @@
 class SpriteRenderer
 {
     public:
-        SpriteRenderer();
+        SpriteRenderer(Shader &shader);
         ~SpriteRenderer();
 
         void Create(Shader &shader);

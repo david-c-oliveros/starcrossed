@@ -9,8 +9,8 @@ class Texture2D
 {
     public:
         Texture2D();
-        void Create(const char* file, bool alpha);
         void Bind() const;
+        void Generate(uint8_t* pData, uint32_t _nWidth, uint32_t _nHeight);
 
 
     public:
@@ -24,9 +24,4 @@ class Texture2D
         uint32_t nWrap_T;
         uint32_t nFilter_Min;
         uint32_t nFilter_Max;
-
-
-    private:
-        void generate(uint8_t* data);
-        void loadTextureFromFile(const char* file, bool alpha);
 };

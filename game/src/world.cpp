@@ -16,15 +16,14 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     }
 
     // TEMP!!!!!
-    pSpriteGrass = std::make_unique<Sprite>("../../res/Texture/TX Tileset Grass.png", true);
-    pSprite = std::make_unique<Sprite>("../../res/Texture/awesomeface.png", true);
+    pSpriteGrass = std::make_unique<Sprite>("grass");
 
     return true;
 }
 
 
 
-void World::Draw(SpriteRenderer &cRenderer, glm::vec2 vDebugPos)
+void World::Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vDebugPos)
 {
 //    glm::vec2 vFirstTileWorld = vecRooms[0]->vecTiles[0]->vWorldPos;
 //    glm::vec2 vFirstTileScreen = WorldToScreen(vFirstTileWorld);
@@ -41,7 +40,7 @@ void World::Draw(SpriteRenderer &cRenderer, glm::vec2 vDebugPos)
             glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
             glm::vec2 vScalar = BASE_TILE_SIZE * m_vWorldScale;
 
-            pSpriteGrass->Draw(cRenderer, vTileScreenPos, vScalar);
+            pSpriteGrass->Draw(pRenderer, vTileScreenPos, vScalar);
         }
     }
 }

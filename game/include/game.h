@@ -11,6 +11,7 @@
 
 #include "engine_defines.h"
 
+#include "resource_manager.h"
 #include "renderer.h"
 #include "shader.h"
 #include "texture.h"
@@ -40,6 +41,7 @@ class Game
 
         void DebugAddVec2(const char* str, glm::vec2 vVec);
         void PrintDebug();
+        void PrintVar(int32_t var);
 
         glm::vec2 GetCursorPos();
 
@@ -56,10 +58,9 @@ class Game
         uint32_t nCanvasHeight;
         GLFWwindow* pWindow;
 
-        Shader cShader;
-        Shader cSimpleShader;
-        Texture2D cSpriteTex;
-        SpriteRenderer cRenderer;
+        Shader s;
+//        SpriteRenderer pRenderer;
+        std::shared_ptr<SpriteRenderer> pRenderer;
 
         glm::mat4 projection;
         glm::mat4 view;

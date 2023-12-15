@@ -10,7 +10,7 @@
 class Entity
 {
     public:
-        Entity(const char* _sTexFilepath, glm::ivec2 _vCoords, glm::vec2 _vSizeScalar);
+        Entity(std::string _sTexName, glm::ivec2 _vCoords);
         ~Entity();
 
         void Create();
@@ -18,7 +18,6 @@ class Entity
 
 
     public:
-        std::unique_ptr<Sprite> cSprite;
+        std::unique_ptr<Sprite> pSprite;
         glm::vec2 vCoords;
-        glm::vec2 vSizeScalar;
 };

@@ -133,9 +133,8 @@ bool Game::Update()
 
 void Game::Destroy()
 {
-    cRenderer.Destroy();
-    cShader.Destroy();
-    cSimpleShader.Destroy();
+    pRenderer->Destroy();
+    ResourceManager::Clear();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -168,10 +167,10 @@ void Game::RenderGame()
 
     projection = glm::ortho<float>(0.0f, fWidth, fHeight, 0.0f, -1000.0f, 1000.0f);
 
-    cShader.SetMat4("view", view);
-    cShader.SetMat4("projection", projection);
+    ResourceManager::GetShader("sprite").SetMat4("view", view);
+    ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
-    pWorld->Draw(cRenderer, pWorld->ScreenToWorld(GetCursorPos()));
+    pWorld->Draw(pRenderer, pWorld->ScreenToWorld(GetCursorPos()));
 }
 
 
@@ -223,7 +222,7 @@ void Game::RenderUI()
         for (auto &s : pWorld->vecDebugInfo)
             ImGui::Text(s.c_str());
 
-        for (auto &s : cRenderer.vecDebugInfo)
+        for (auto &s : pRenderer->vecDebugInfo)
             ImGui::Text(s.c_str());
 
         ImGui::Text(sCursorWorldPos.c_str());
@@ -279,11 +278,27 @@ glm::vec2 Game::GetCursorPos()
 /**********************************/
 void Game::LoadResources()
 {
-    cShader.Create("../../shaders/sprite.vert", "../../shaders/sprite.frag");
+    ResourceManager::LoadShader("../../shaders/sprite.vert", "../../shaders/sprite.frag", nullptr, "sprite");
+    //ResourceManager::GetShader("sprite").Use();
+    //ResourceManager::GetShader("sprite").SetInt("sImage", 0);
 
-    cRenderer.Create(cShader);
+    Shader s = ResourceManager::GetShader("sprite");
+    pRenderer = std::make_shared<SpriteRenderer>(s);
 
-    cShader.SetInt("sImage", 0);
+    ResourceManager::LoadTexture("../../res/Texture/TX Tileset Grass.png", true, "grass");
+
+    // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
+
+    //pRenderer = std::make_shared<SpriteRenderer>(ResourceManager::GetShader("sprite"));
+    //pRenderer->Create(ResourceManager::GetShader("sprite"));
+
+}
+
+
+
+void Game::PrintVar(int32_t var)
+{
+    std::cout << var << std::endl;
 }
 
 

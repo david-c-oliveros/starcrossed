@@ -2,18 +2,14 @@
 
 
 
-Sprite::Sprite(const char* _sTexFilepath,
-               bool _bAlphaTex,
-               glm::vec2 _vSizeScalar,
+Sprite::Sprite(std::string _sTexName,
                glm::vec3 _vColor,
                float _fRotation)
 
-    : bAlphaTex(_bAlphaTex),
-      vSizeScalar(_vSizeScalar),
+    : sTexName(_sTexName),
       vColor(_vColor),
       fRotation(_fRotation)
 {
-    cTexture.Create(_sTexFilepath, bAlphaTex);
 }
 
 
@@ -24,7 +20,8 @@ Sprite::~Sprite()
 
 
 
-void Sprite::Draw(SpriteRenderer &cRenderer, glm::vec2 vPos, glm::vec2 vScale)
+void Sprite::Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vPos, glm::vec2 vScale)
 {
-    cRenderer.DrawSprite(cTexture, vPos, vScale, fRotation, vColor);
+    Texture2D t = ResourceManager::GetTexture(sTexName);
+    pRenderer->DrawSprite(t, vPos, vScale, fRotation, vColor);
 }
