@@ -36,35 +36,48 @@ Game::~Game()
 /**************************/
 bool Game::Create()
 {
-    if (!Renderer::Init_GLFW(&pWindow, nCanvasWidth, nCanvasHeight))
-    {
-        std::cout << "ERROR::GLFW" << std::endl;
+    if (!GLInit())
         return false;
-    }
 
     GLConfig();
     UIConfig();
 
     LoadResources();
 
-
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 vOrigin = glm::vec3(0.0f);
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
 
-    pWorld = std::make_unique<World>();
-    pWorld->Create(glm::ivec2(32, 32), glm::vec2(1.0f));
+    cWorld.Create(glm::ivec2(32, 32), glm::vec2(1.0f));
+    
+    pPlayer = std::make_unique<Character>(glm::vec2(0.0f));
+    pPlayer->AddSpriteSheet("rogue_idle_sheet", "idle");
+    pPlayer->AddSpriteSheet("rogue_run_sheet", "run");
+    pPlayer->AddSpriteSheet("debug", "debug");
 
     return true;
 }
 
 
 
-/*******************************/
-/*                             */
-/*        L:GLFW Config        */
-/*                             */
-/*******************************/
+/************************************/
+/*                                  */
+/*        L:GLFW Init/Config        */
+/*                                  */
+/************************************/
+bool Game::GLInit()
+{
+    if (!Renderer::Init_GLFW(&pWindow, nCanvasWidth, nCanvasHeight))
+    {
+        std::cout << "ERROR::GLFW" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+
 void Game::GLConfig()
 {
     glfwSetFramebufferSizeCallback(pWindow, FramebufferSizeCallback);
@@ -133,7 +146,7 @@ bool Game::Update()
 
 void Game::Destroy()
 {
-    pRenderer->Destroy();
+    cRenderer.Destroy();
     ResourceManager::Clear();
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -170,7 +183,11 @@ void Game::RenderGame()
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
-    pWorld->Draw(pRenderer, pWorld->ScreenToWorld(GetCursorPos()));
+    if (m_bShowWorld)
+        cWorld.Draw(cRenderer);
+
+    if (m_bShowCharacter)
+    pPlayer->Draw(cRenderer, cWorld);
 }
 
 
@@ -214,15 +231,18 @@ void Game::RenderUI()
 
     if (m_bShowDebugInfo)
     {
-        std::string sCursorWorldPos = "Cursor World Pos: " + glm::to_string(pWorld->ScreenToWorld(GetCursorPos()));
+        std::string sCursorWorldPos = "Cursor World Pos: " + glm::to_string(cWorld.ScreenToWorld(GetCursorPos()));
         std::string sCursorMoveDelta = "Cursor Move Delta: " + glm::to_string(m_vCursorMoveDelta);
 
         ImGui::Begin("Debug");
+        
+        ImGui::Checkbox("Show map", &m_bShowWorld);
+        ImGui::Checkbox("Show character", &m_bShowCharacter);
 
-        for (auto &s : pWorld->vecDebugInfo)
+        for (auto &s : cWorld.vecDebugInfo)
             ImGui::Text(s.c_str());
 
-        for (auto &s : pRenderer->vecDebugInfo)
+        for (auto &s : cRenderer.vecDebugInfo)
             ImGui::Text(s.c_str());
 
         ImGui::Text(sCursorWorldPos.c_str());
@@ -283,9 +303,13 @@ void Game::LoadResources()
     //ResourceManager::GetShader("sprite").SetInt("sImage", 0);
 
     Shader s = ResourceManager::GetShader("sprite");
-    pRenderer = std::make_shared<SpriteRenderer>(s);
+    cRenderer.Create(s);
 
+    ResourceManager::LoadTexture("../../res/Texture/awesomeface.png", true, "debug");
     ResourceManager::LoadTexture("../../res/Texture/TX Tileset Grass.png", true, "grass");
+    ResourceManager::LoadTexture("../../res/asset_packs/simple_space_station_tileset/TileSet v1.0.png", true, "spaceship_sheet");
+    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Rogue/Idle/Idle-Sheet.png", true, "rogue_idle_sheet");
+    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Rogue/Run/Run-Sheet.png", true, "rogue_run_sheet");
 
     // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
 
@@ -323,20 +347,20 @@ void Game::ProcessMouseInput()
     {
         if (bPanning)
         {
-            pWorld->UpdatePan(vPos);
-            m_vCursorMoveDelta += pWorld->ScreenToWorld(vPos);
+            cWorld.UpdatePan(vPos);
+            m_vCursorMoveDelta += cWorld.ScreenToWorld(vPos);
         }
         else
         {
             m_vCursorMoveDelta = glm::vec2(0.0f);
-            pWorld->StartPan(vPos);
+            cWorld.StartPan(vPos);
             bPanning = true;
         }
 
     }
     else if (bPanning)
     {
-        pWorld->EndPan(vPos);
+        cWorld.EndPan(vPos);
         bPanning = false;
     }
 }
@@ -367,7 +391,7 @@ void Game::PrintDebug()
 {
 //    glm::vec2 vCursorPos = GetCursorPos();
 //    std::cout << "Mouse Pos - Screen: " << glm::to_string(vCursorPos) << " ---- World: "
-//              << glm::to_string(pWorld->ScreenToWorld(vCursorPos)) << "\r" << std::flush;
+//              << glm::to_string(cWorld.ScreenToWorld(vCursorPos)) << "\r" << std::flush;
 }
 
 
@@ -405,7 +429,7 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        pGame->pWorld->SetWorldOffset(glm::vec2(0.0f));
+        pGame->cWorld.SetWorldOffset(glm::vec2(0.0f));
     }
 }
 
@@ -416,9 +440,9 @@ void Game::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
     Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
 
     if (yoffset > 0)
-        pGame->pWorld->ZoomAtScreenPos(2.0f, pGame->GetCursorPos());
+        pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorPos());
     else
-        pGame->pWorld->ZoomAtScreenPos(0.5f, pGame->GetCursorPos());
+        pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorPos());
 }
 
 

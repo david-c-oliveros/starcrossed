@@ -31,8 +31,13 @@ class ResourceManager
                                  std::string sName);
 
         static Shader GetShader(std::string sName);
-        static Texture2D LoadTexture(const char* cFile, bool bAlpha, std::string sName);
+
+        static Texture2D LoadTexture(const char* cFile,
+                                     bool bAlpha,
+                                     std::string sName);
+
         static Texture2D GetTexture(std::string sName);
+
         static void Clear();
 
 

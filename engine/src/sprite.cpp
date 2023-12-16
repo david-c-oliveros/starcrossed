@@ -20,8 +20,11 @@ Sprite::~Sprite()
 
 
 
-void Sprite::Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vPos, glm::vec2 vScale)
+void Sprite::Draw(SpriteRenderer &cRenderer,
+                  glm::vec2 vPos, glm::vec2 vScale,
+                  glm::vec2 vSizeInSheet, glm::vec2 vOffset)
 {
+    vScale *= BASE_TILE_SIZE;
     Texture2D t = ResourceManager::GetTexture(sTexName);
-    pRenderer->DrawSprite(t, vPos, vScale, fRotation, vColor);
+    cRenderer.DrawSprite(t, vPos, vSizeInSheet, vOffset, vScale, fRotation, vColor);
 }

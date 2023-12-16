@@ -21,11 +21,16 @@ class Sprite
 
         ~Sprite();
 
-        void Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vPos, glm::vec2 vScale);
+        void Draw(SpriteRenderer &cRenderer,
+                  glm::vec2 vPos,
+                  glm::vec2 vScale,
+                  glm::vec2 vSizeInSheet = glm::vec2(1.0f),
+                  glm::vec2 vOffset = glm::vec2(0.0f));
 
 
     public:
         std::string sTexName;
         glm::vec3 vColor;
         float fRotation;
+        bool m_bIsSpriteSheet;
 };

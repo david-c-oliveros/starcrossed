@@ -2,10 +2,8 @@
 
 
 
-SpriteRenderer::SpriteRenderer(Shader &shader)
+SpriteRenderer::SpriteRenderer()
 {
-    cShader = shader;
-    initRenderData();
 }
 
 
@@ -32,20 +30,23 @@ void SpriteRenderer::Destroy()
 
 
 
-void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 position,
-                                glm::vec2 size, float rotate, glm::vec3 color)
+void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 vPos,
+                                glm::vec2 vTexSizeInSheet, glm::vec2 vTexOffset,
+                                glm::vec2 vSize, float fRotate, glm::vec3 vColor)
 {
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::translate(model, glm::vec3(vPos, 0.0f));
 
-    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5 * size.y, 0.0f));
-    model = glm::rotate(model, glm::radians(rotate), glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5 * size.y, 0.0f));
+    model = glm::translate(model, glm::vec3(0.5f * vSize.x, 0.5 * vSize.y, 0.0f));
+    model = glm::rotate(model, glm::radians(fRotate), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * vSize.x, -0.5 * vSize.y, 0.0f));
 
-    model = glm::scale(model, glm::vec3(size, 1.0f));
+    model = glm::scale(model, glm::vec3(vSize, 1.0f));
 
+    cShader.SetVec2f("vTexSizeInSheet", vTexSizeInSheet);
+    cShader.SetVec2f("vTexOffset", vTexOffset);
     cShader.SetMat4("model", model);
-    cShader.SetVec3f("vSpriteColor", color);
+    cShader.SetVec3f("vSpriteColor", vColor);
 
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();

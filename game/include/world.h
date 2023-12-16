@@ -2,10 +2,35 @@
 
 #include <vector>
 #include <memory>
+#include <filesystem>
 
 #include "sprite.h"
 #include "sprite_renderer.h"
-#include "room.h"
+
+
+
+struct Tile
+{
+    Tile(glm::ivec2 _vWorldPos)
+        : vWorldPos(_vWorldPos) {}
+
+    glm::vec2 vWorldPos;
+    glm::vec2 vTexOffset;
+    std::string sTexName;
+};
+
+
+
+struct Room
+{
+    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0))
+        : vUpperLeftPos(_vUpperLeftPos) {}
+
+    glm::ivec2 vDim;
+    glm::ivec2 vUpperLeftPos;
+
+    std::vector<std::unique_ptr<Tile>> vecTiles;
+};
 
 
 
@@ -16,7 +41,8 @@ class World
         World() = default;
 
         bool Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale = glm::vec2(1.0f));
-        void Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vDebugPos);
+        void Draw(SpriteRenderer &cRenderer);
+        void LoadMap(const char* cFile);
 
         void SetWorldOffset(const glm::vec2& vOffset);
         void MoveWorldOffset(const glm::vec2& vDeltaOffset);
@@ -62,6 +88,6 @@ class World
 
 
         // TEMP!!!
-        std::unique_ptr<Sprite> pSpriteGrass;
+        std::unique_ptr<Sprite> pSpriteSpaceship;
         std::unique_ptr<Sprite> pSprite;
 };

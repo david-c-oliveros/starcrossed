@@ -2,8 +2,13 @@
 
 
 
-Entity::Entity(std::string _sTexName, glm::ivec2 _vCoords)
-    : vCoords(_vCoords)
+Entity::Entity(glm::vec2 _vWorldPos)
+    : vWorldPos(_vWorldPos)
 {
-    pSprite = std::make_unique<Sprite>(_sTexName, glm::vec3(1.0f), 0.0f);
+}
+
+
+
+Entity::~Entity()
+{
 }

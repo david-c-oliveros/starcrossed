@@ -18,6 +18,7 @@
 #include "sprite_renderer.h"
 
 #include "world.h"
+#include "character.h"
 
 
 
@@ -45,6 +46,7 @@ class Game
 
         glm::vec2 GetCursorPos();
 
+        bool GLInit();
         void GLConfig();
         void UIConfig();
 
@@ -58,14 +60,13 @@ class Game
         uint32_t nCanvasHeight;
         GLFWwindow* pWindow;
 
-        Shader s;
-//        SpriteRenderer pRenderer;
-        std::shared_ptr<SpriteRenderer> pRenderer;
+        SpriteRenderer cRenderer;
+        World cWorld;
+
+        std::unique_ptr<Character> pPlayer;
 
         glm::mat4 projection;
         glm::mat4 view;
-
-        std::unique_ptr<World> pWorld;
 
         bool bPanning = false;
 
@@ -78,6 +79,9 @@ class Game
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         bool m_bShowUIWindow;
         bool m_bShowDebugInfo = true;
+
+        bool m_bShowWorld = true;
+        bool m_bShowCharacter = true;
 
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
 };

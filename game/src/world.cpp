@@ -10,37 +10,93 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     m_vRecipPixel = 1.0f / m_vPixelScale;
     vecDebugInfo[0] = "World";
 
-    for (int i = 0; i < 1; i++)
-    {
-        vecRooms.push_back(std::make_unique<Room>(glm::ivec2(4, 16), glm::ivec2(0, i)));
-    }
-
-    // TEMP!!!!!
-    pSpriteGrass = std::make_unique<Sprite>("grass");
+    pSpriteSpaceship = std::make_unique<Sprite>("spaceship_sheet");
+    LoadMap("../../res/map_01.txt");
 
     return true;
 }
 
 
 
-void World::Draw(std::shared_ptr<SpriteRenderer> pRenderer, glm::vec2 vDebugPos)
+void World::Draw(SpriteRenderer &cRenderer)
 {
-//    glm::vec2 vFirstTileWorld = vecRooms[0]->vecTiles[0]->vWorldPos;
-//    glm::vec2 vFirstTileScreen = WorldToScreen(vFirstTileWorld);
-
-//    vecDebugInfo[1] = "World Offset: " + glm::to_string(m_vWorldOffset);
-//    vecDebugInfo[2] = "vFirstTileWorld: " + glm::to_string(vFirstTileWorld);
-//    vecDebugInfo[3] = "vFirstTileScreen: " + glm::to_string(vFirstTileScreen);
-//    vecDebugInfo[4] = "vWorldScale: " + glm::to_string(m_vWorldScale);
-
     for (auto &r : vecRooms)
     {
         for (auto &t : r->vecTiles)
         {
             glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
-            glm::vec2 vScalar = BASE_TILE_SIZE * m_vWorldScale;
+            glm::vec2 vScalar = m_vWorldScale;
 
-            pSpriteGrass->Draw(pRenderer, vTileScreenPos, vScalar);
+            pSpriteSpaceship->Draw(cRenderer, vTileScreenPos, vScalar, glm::vec2(0.1f), t->vTexOffset);
+        }
+    }
+}
+
+
+
+void World::LoadMap(const char* cMapFile)
+{
+    // TEMP - Currently only loads one room
+    vecRooms.push_back(std::make_unique<Room>(glm::ivec2(0)));
+
+    glm::ivec2 vDim(0, 0);
+
+    std::ifstream fin;
+    if (std::filesystem::exists(cMapFile))
+    {
+        fin.open(cMapFile);
+    }
+
+    std::vector<std::vector<char>> vecMap;
+    std::string sLine;
+
+    uint32_t x = 0;
+    uint32_t y = 0;
+    while(fin >> sLine)
+    {
+        std::stringstream ss;
+        ss << sLine;
+        char c;
+        std::vector<char> vec;
+        while(ss.get(c))
+        {
+            vec.push_back(c);
+            x++;
+        }
+        vecMap.push_back(vec);
+        y++;
+    }
+
+    // TODO - Please CLEAN UP THIS MESS!!
+    for (int y = 0; y < vecMap.size(); y++)
+    {
+        for (int x = 0; x < vecMap[y].size(); x++)
+        {
+            std::unique_ptr<Tile> pTile = std::make_unique<Tile>(glm::vec2(x, y) * BASE_TILE_SIZE +
+                                          (glm::vec2)vecRooms[0]->vUpperLeftPos * BASE_TILE_SIZE);
+            if (vecMap[y][x] == '.')
+                pTile->vTexOffset = glm::vec2(1, 1);
+            else if (vecMap[y][x] == '#' && x == 0 && y == 0)
+                pTile->vTexOffset = glm::vec2(3, 0);
+
+            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == 0)
+                pTile->vTexOffset = glm::vec2(5, 0);
+            else if (vecMap[y][x] == '#' && x == 0 && y == vecMap.size() - 1)
+                pTile->vTexOffset = glm::vec2(3, 2);
+
+            else if (vecMap[y][x] == '#' && x == 0)
+                pTile->vTexOffset = glm::vec2(3, 1);
+            else if (vecMap[y][x] == '#' && y == 0)
+                pTile->vTexOffset = glm::vec2(4, 0);
+
+            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == vecMap.size() - 1)
+                pTile->vTexOffset = glm::vec2(5, 2);
+            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1)
+                pTile->vTexOffset = glm::vec2(5, 1);
+            else if (vecMap[y][x] == '#' && y == vecMap.size() - 1)
+                pTile->vTexOffset = glm::vec2(4, 2);
+
+            vecRooms[0]->vecTiles.push_back(std::move(pTile));
         }
     }
 }

@@ -4,6 +4,10 @@ layout (location = 0) in vec4 aPos;
 
 out vec2 vTexCoords;
 
+uniform vec2 vTexSizeInPixels;
+uniform vec2 vTexSizeInSheet;
+uniform vec2 vTexOffset;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -11,6 +15,6 @@ uniform mat4 projection;
 
 void  main()
 {
-    vTexCoords = aPos.zw;
+    vTexCoords = aPos.zw * vTexSizeInSheet + vTexOffset * vTexSizeInSheet;
     gl_Position = projection * view * model * vec4(aPos.xy, 0.0, 1.0);
 }
