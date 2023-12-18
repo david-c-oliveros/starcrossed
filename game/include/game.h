@@ -16,6 +16,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "sprite_renderer.h"
+#include "timer.h"
 
 #include "world.h"
 #include "character.h"
@@ -69,6 +70,7 @@ class Game
         glm::mat4 view;
 
         bool bPanning = false;
+        bool bPlayerIdle = true;
 
 
     private:

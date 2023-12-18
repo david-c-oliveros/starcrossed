@@ -2,13 +2,8 @@
 
 
 
-Sprite::Sprite(std::string _sTexName,
-               glm::vec3 _vColor,
-               float _fRotation)
-
-    : sTexName(_sTexName),
-      vColor(_vColor),
-      fRotation(_fRotation)
+Sprite::Sprite(std::string _sTexName)
+    : sTexName(_sTexName), vColor(glm::vec3(1.0f)), fRotation(0.0f)
 {
 }
 

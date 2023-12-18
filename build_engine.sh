@@ -17,7 +17,7 @@ external/imgui/imgui*.cpp
 "
 
 assembly="game"
-compilerFlags="-g -fPIC"
+compilerFlags="-g -fPIC -Wfatal-errors -w"
 
 includeFlags="
 -Iengine/include/

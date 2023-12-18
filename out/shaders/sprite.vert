@@ -15,6 +15,7 @@ uniform mat4 projection;
 
 void  main()
 {
-    vTexCoords = aPos.zw * vTexSizeInSheet + vTexOffset * vTexSizeInSheet;
+//    vTexCoords = aPos.zw * vTexSizeInSheet + vTexOffset * vTexSizeInSheet;
+    vTexCoords = aPos.zw * vTexSizeInSheet + vTexOffset;
     gl_Position = projection * view * model * vec4(aPos.xy, 0.0, 1.0);
 }

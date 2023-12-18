@@ -50,10 +50,20 @@ bool Game::Create()
 
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(1.0f));
     
-    pPlayer = std::make_unique<Character>(glm::vec2(0.0f));
-    pPlayer->AddSpriteSheet("rogue_idle_sheet", "idle");
-    pPlayer->AddSpriteSheet("rogue_run_sheet", "run");
-    pPlayer->AddSpriteSheet("debug", "debug");
+    pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
+
+    pPlayer->AddAnimatedSprite("rock_walk_back", "walk_back");
+    pPlayer->AddAnimatedSprite("rock_walk_forward", "walk_forward");
+    pPlayer->AddAnimatedSprite("rock_walk_left", "walk_left");
+    pPlayer->AddAnimatedSprite("rock_walk_right", "walk_right");
+
+    pPlayer->ConfigAnimatedSprite("walk_back", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("walk_forward", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("walk_left", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f)), glm::vec2(2.0f);
+    pPlayer->ConfigAnimatedSprite("walk_right", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+
+    pPlayer->SetCurrentSprite("walk_forward");
+    pPlayer->StartSpriteAnim();
 
     return true;
 }
@@ -131,6 +141,9 @@ bool Game::Update()
         return false;
 
     SetDeltaTime();
+
+    pPlayer->Update();
+
     RenderGame();
     RenderUI();
     ProcessInput();
@@ -231,13 +244,11 @@ void Game::RenderUI()
 
     if (m_bShowDebugInfo)
     {
-        std::string sCursorWorldPos = "Cursor World Pos: " + glm::to_string(cWorld.ScreenToWorld(GetCursorPos()));
-        std::string sCursorMoveDelta = "Cursor Move Delta: " + glm::to_string(m_vCursorMoveDelta);
-
         ImGui::Begin("Debug");
         
         ImGui::Checkbox("Show map", &m_bShowWorld);
         ImGui::Checkbox("Show character", &m_bShowCharacter);
+        ImGui::Checkbox("Toggle player state", &bPlayerIdle);
 
         for (auto &s : cWorld.vecDebugInfo)
             ImGui::Text(s.c_str());
@@ -245,8 +256,8 @@ void Game::RenderUI()
         for (auto &s : cRenderer.vecDebugInfo)
             ImGui::Text(s.c_str());
 
-        ImGui::Text(sCursorWorldPos.c_str());
-        ImGui::Text(sCursorMoveDelta.c_str());
+        for (auto &s : pPlayer->vecDebugInfo)
+            ImGui::Text(s.c_str());
 
         ImGui::End();
     }
@@ -308,8 +319,10 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../../res/Texture/awesomeface.png", true, "debug");
     ResourceManager::LoadTexture("../../res/Texture/TX Tileset Grass.png", true, "grass");
     ResourceManager::LoadTexture("../../res/asset_packs/simple_space_station_tileset/TileSet v1.0.png", true, "spaceship_sheet");
-    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Rogue/Idle/Idle-Sheet.png", true, "rogue_idle_sheet");
-    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Rogue/Run/Run-Sheet.png", true, "rogue_run_sheet");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet.png", true, "rock_walk_back");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-2.png", true, "rock_walk_forward");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-3.png", true, "rock_walk_left");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-4.png", true, "rock_walk_right");
 
     // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
 
