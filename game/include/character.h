@@ -1,9 +1,19 @@
 #include <string>
 #include <map>
+#include <array>
 
+#include "global_enums.h"
 #include "world.h"
 #include "entity.h"
 #include "animated_sprite.h"
+
+
+
+enum class CharacterState
+{
+    IDLE,
+    WALK
+};
 
 
 
@@ -18,16 +28,28 @@ class Character : public Entity
         void ConfigAnimatedSprite(std::string sSpriteName, uint32_t nNumFrames, uint32_t nTicksPerFrame,
                                   glm::vec2 vStart, glm::vec2 vFrameSize, glm::vec2 vFrameOffset,
                                   glm::vec2 vSpriteScalar = glm::vec2(1.0f));
-        void SetCurrentSprite(std::string sSpriteName);
+        void SetState(CharacterState _eState);
+        void SetDir(Direction _eDir);
         void StartSpriteAnim();
         void Update();
+        void Move(Direction _eDir);
 
 
     public:
         std::map<std::string, AnimatedSprite> mSprites;
-
         std::vector<std::string> vecDebugInfo;
 
+        Direction eCurDir = Direction::FORWARD;
+        CharacterState eCurState = CharacterState::IDLE;
+        std::array<glm::vec2, 4> aDirs;
+        std::array<std::string, 4> aDirStrings;
+        std::array<std::string, 4> aStateStrings;
+
+
     private:
-        std::string m_sCurSprite;
+        void setCurrentSpriteName();
+
+
+    private:
+        std::string m_sCurSpriteName;
 };

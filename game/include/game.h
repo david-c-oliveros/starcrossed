@@ -18,6 +18,7 @@
 #include "sprite_renderer.h"
 #include "timer.h"
 
+#include "global_enums.h"
 #include "world.h"
 #include "character.h"
 

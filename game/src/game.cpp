@@ -49,20 +49,35 @@ bool Game::Create()
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
 
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(1.0f));
-    
+
     pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
 
-    pPlayer->AddAnimatedSprite("rock_walk_back", "walk_back");
-    pPlayer->AddAnimatedSprite("rock_walk_forward", "walk_forward");
-    pPlayer->AddAnimatedSprite("rock_walk_left", "walk_left");
-    pPlayer->AddAnimatedSprite("rock_walk_right", "walk_right");
+    pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
+    pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
+    pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
+    pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
 
-    pPlayer->ConfigAnimatedSprite("walk_back", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("walk_forward", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("walk_left", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f)), glm::vec2(2.0f);
-    pPlayer->ConfigAnimatedSprite("walk_right", 10, 5, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
+    pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
+    pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
+    pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
 
-    pPlayer->SetCurrentSprite("walk_forward");
+    // TPF -> Ticks Per Frame
+    uint32_t nTPF = 4;
+    uint32_t nNumFrames = 10;
+    pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
+
+    nTPF = 8;
+    nNumFrames = 7;
+    pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
+    pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
+
+    pPlayer->SetState(CharacterState::IDLE);
     pPlayer->StartSpriteAnim();
 
     return true;
@@ -319,10 +334,15 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../../res/Texture/awesomeface.png", true, "debug");
     ResourceManager::LoadTexture("../../res/Texture/TX Tileset Grass.png", true, "grass");
     ResourceManager::LoadTexture("../../res/asset_packs/simple_space_station_tileset/TileSet v1.0.png", true, "spaceship_sheet");
-    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet.png", true, "rock_walk_back");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet.png", true, "rock_walk_backward");
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-2.png", true, "rock_walk_forward");
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-3.png", true, "rock_walk_left");
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/walk/spritesheet-4.png", true, "rock_walk_right");
+
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-5.png", true, "rock_idle_backward");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-6.png", true, "rock_idle_forward");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-7.png", true, "rock_idle_left");
+    ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-8.png", true, "rock_idle_right");
 
     // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
 
@@ -349,6 +369,28 @@ void Game::ProcessInput()
 {
     if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
         ProcessMouseInput();
+
+    float fMoveScalar = 0.1f;
+    if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        pPlayer->Move(Direction::FORWARD);
+    }
+    else if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        pPlayer->Move(Direction::BACKWARD);
+    }
+    else if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        pPlayer->Move(Direction::LEFT);
+    }
+    else if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        pPlayer->Move(Direction::RIGHT);
+    }
+    else
+    {
+        pPlayer->SetState(CharacterState::IDLE);
+    }
 }
 
 

@@ -6,6 +6,13 @@ Character::Character(glm::vec2 _vWorldPos)
     : Entity(_vWorldPos)
 {
     vecDebugInfo = { "Character", "" };
+    vecDebugInfo.push_back("Character");
+    for (int i = 0; i < 8; i++)
+        vecDebugInfo.push_back("");
+
+    aDirs = { glm::ivec2(0, -1), glm::ivec2(0, 1), glm::ivec2(-1, 0), glm::ivec2(1, 0) };
+    aDirStrings = { "forward", "backward", "left", "right" };
+    aStateStrings = { "idle", "walk" };
 }
 
 
@@ -18,16 +25,16 @@ Character::~Character()
 
 void Character::Draw(SpriteRenderer &cRenderer, World &cWorld)
 {
-    // TODO - Debug sprite rendering issue
-    glm::vec2 vScreenPos = cWorld.WorldToScreen(vWorldPos);
-    mSprites.find(m_sCurSprite)->second.Draw(cRenderer, vScreenPos, cWorld.GetWorldScale());
+    vecDebugInfo[2] = "Current sprite name: " + m_sCurSpriteName;
+    glm::vec2 vAbsolutePos(vWorldPos * BASE_TILE_SIZE);
+    glm::vec2 vScreenPos = cWorld.WorldToScreen(vAbsolutePos);
+    mSprites.find(m_sCurSpriteName)->second.Draw(cRenderer, vScreenPos, cWorld.GetWorldScale());
 }
 
 
 
 void Character::AddAnimatedSprite(std::string sTexName, std::string sSpriteName)
 {
-    m_sCurSprite = sSpriteName;
     mSprites.emplace(sSpriteName, sTexName);
 }
 
@@ -41,22 +48,51 @@ void Character::ConfigAnimatedSprite(std::string sSpriteName, uint32_t nNumFrame
 
 
 
-void Character::SetCurrentSprite(std::string sSpriteName)
+void Character::SetState(CharacterState _eState)
 {
     // TODO (maybe) - stop old animation
-    m_sCurSprite = sSpriteName;
+    eCurState = _eState;
+}
+
+
+
+void Character::SetDir(Direction _eDir)
+{
+    eCurDir = _eDir;
 }
 
 
 
 void Character::StartSpriteAnim()
 {
-    mSprites.find(m_sCurSprite)->second.StartAnim();
+    for (std::map<std::string, AnimatedSprite>::iterator iter = mSprites.begin(); iter != mSprites.end(); ++iter)
+    {
+        std::cout << "Starting animation for sprite: " << iter->first << std::endl;;
+        iter->second.StartAnim();
+    }
 }
 
 
 
 void Character::Update()
 {
-    mSprites.find(m_sCurSprite)->second.Update();
+    setCurrentSpriteName();
+    mSprites.find(m_sCurSpriteName)->second.Update();
+}
+
+
+
+void Character::Move(Direction _eDir)
+{
+    float fSpeedScalar = 0.027;
+    vWorldPos += aDirs[(int32_t)_eDir] * fSpeedScalar;
+    SetDir(_eDir);
+    SetState(CharacterState::WALK);
+}
+
+
+
+void Character::setCurrentSpriteName()
+{
+    m_sCurSpriteName = aStateStrings[(int32_t)eCurState] + "_" + aDirStrings[(int32_t)eCurDir];
 }
