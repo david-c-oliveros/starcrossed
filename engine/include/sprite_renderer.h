@@ -25,9 +25,14 @@ class SpriteRenderer
                         glm::vec2 vPos,
                         glm::vec2 vTexSizeInSheet,
                         glm::vec2 vTexOffset,
-                        glm::vec2 vSize = glm::vec2(10.0f, 10.0f),
-                        float fRotate = 0.0f,
-                        glm::vec3 vColor = glm::vec3(1.0f));
+                        glm::vec2 vSize = BASE_TILE_SIZE,
+                        glm::vec3 vColor = glm::vec3(1.0f),
+                        float fRotation = 0.0f);
+
+        void DrawSprite(glm::vec2 vPos,
+                        glm::vec2 vSize = BASE_TILE_SIZE,
+                        glm::vec3 vColor = glm::vec3(1.0f),
+                        float fRotation = 0.0f);
 
 
     public:

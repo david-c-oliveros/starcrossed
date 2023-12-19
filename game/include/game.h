@@ -33,7 +33,7 @@ class Game
         bool Create();
         void Destroy();
         bool Update();
-        void Shutdown();
+        void UpdateCursorTile();
         void RenderGame();
         void RenderUI();
         void SetDeltaTime();
@@ -42,11 +42,10 @@ class Game
         void ProcessInput();
         void ProcessMouseInput();
 
-        void DebugAddVec2(const char* str, glm::vec2 vVec);
-        void PrintDebug();
         void PrintVar(int32_t var);
 
-        glm::vec2 GetCursorPos();
+        glm::vec2 GetCursorScreenPos();
+        glm::vec2 GetCursorWorldPos();
 
         bool GLInit();
         void GLConfig();
@@ -87,4 +86,8 @@ class Game
         bool m_bShowCharacter = true;
 
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
+        glm::ivec2 m_vCursorTile;
+        Sprite cCursorTileSprite;
+
+        std::vector<std::string> m_vecDebugInfo;
 };

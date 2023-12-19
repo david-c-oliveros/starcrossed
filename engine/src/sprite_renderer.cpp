@@ -31,18 +31,19 @@ void SpriteRenderer::Destroy()
 
 
 void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 vPos,
-                                glm::vec2 vTexSizeInSheet, glm::vec2 vTexOffset,
-                                glm::vec2 vSize, float fRotate, glm::vec3 vColor)
+                glm::vec2 vTexSizeInSheet, glm::vec2 vTexOffset,
+                glm::vec2 vSize, glm::vec3 vColor, float fRotation)
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(vPos, 0.0f));
 
     model = glm::translate(model, glm::vec3(0.5f * vSize.x, 0.5 * vSize.y, 0.0f));
-    model = glm::rotate(model, glm::radians(fRotate), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, glm::radians(fRotation), glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::translate(model, glm::vec3(-0.5f * vSize.x, -0.5 * vSize.y, 0.0f));
 
     model = glm::scale(model, glm::vec3(vSize, 1.0f));
 
+    cShader.SetBool("bTextured", true);
     cShader.SetVec2f("vTexSizeInSheet", vTexSizeInSheet);
     cShader.SetVec2f("vTexOffset", vTexOffset);
     cShader.SetMat4("model", model);
@@ -50,6 +51,26 @@ void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 vPos,
 
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
+
+    Renderer::Draw(nQuadVAO, cShader, 6);
+}
+
+
+
+void SpriteRenderer::DrawSprite(glm::vec2 vPos, glm::vec2 vSize, glm::vec3 vColor, float fRotation)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(vPos, 0.0f));
+
+    model = glm::translate(model, glm::vec3(0.5f * vSize.x, 0.5 * vSize.y, 0.0f));
+    model = glm::rotate(model, glm::radians(fRotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * vSize.x, -0.5 * vSize.y, 0.0f));
+
+    model = glm::scale(model, glm::vec3(vSize, 1.0f));
+
+    cShader.SetBool("bTextured", false);
+    cShader.SetMat4("model", model);
+    cShader.SetVec3f("vSpriteColor", vColor);
 
     Renderer::Draw(nQuadVAO, cShader, 6);
 }

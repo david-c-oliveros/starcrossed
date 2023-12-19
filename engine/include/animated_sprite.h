@@ -13,7 +13,7 @@ class AnimatedSprite : public Sprite
         ~AnimatedSprite();
 
         void CreateFrames(uint32_t _nNumFrames, uint32_t nTicksPerFrame,
-                          glm::vec2 _vStart, glm::vec2 _vFrameSize, glm::vec2 _vFrameOffset,
+                          glm::vec2 _vStart, glm::vec2 _vFrameSizeInSheet, glm::vec2 _vFrameOffset,
                           glm::vec2 _vScalar = glm::vec2(1.0f));
         void SetAnimRate(uint32_t nTicksPerFrame);
         void StartAnim();
@@ -29,7 +29,7 @@ class AnimatedSprite : public Sprite
 
     private:
         glm::vec2 m_vStart;
-        glm::vec2 m_vFrameSize;
+        glm::vec2 m_vFrameSizeInSheet;
         glm::vec2 m_vFrameOffset;
         glm::vec2 m_vScalar;
 

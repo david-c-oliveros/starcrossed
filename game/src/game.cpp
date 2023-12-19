@@ -44,11 +44,17 @@ bool Game::Create()
 
     LoadResources();
 
+    m_vecDebugInfo = { "Game Debug:" };
+
+    for (int i = 0; i < 8; i++)
+        m_vecDebugInfo.push_back("");
+
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 vOrigin = glm::vec3(0.0f);
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
 
-    cWorld.Create(glm::ivec2(32, 32), glm::vec2(1.0f));
+    cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
+    cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
     pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
 
@@ -81,6 +87,20 @@ bool Game::Create()
     pPlayer->StartSpriteAnim();
 
     return true;
+}
+
+
+
+void Game::Destroy()
+{
+    cRenderer.Destroy();
+    ResourceManager::Clear();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(pWindow);
 }
 
 
@@ -157,12 +177,13 @@ bool Game::Update()
 
     SetDeltaTime();
 
+    UpdateCursorTile();
+
     pPlayer->Update();
 
     RenderGame();
     RenderUI();
     ProcessInput();
-    PrintDebug();
 
     glfwSwapBuffers(pWindow);
     glfwPollEvents();
@@ -172,16 +193,12 @@ bool Game::Update()
 
 
 
-void Game::Destroy()
+void Game::UpdateCursorTile()
 {
-    cRenderer.Destroy();
-    ResourceManager::Clear();
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glfwDestroyWindow(pWindow);
+    glm::vec2 vCursorTileFloat = GetCursorWorldPos() / BASE_TILE_SIZE;
+    m_vCursorTile.x = vCursorTileFloat.x < 0.0 ? (int32_t)(vCursorTileFloat.x - 1) : (int32_t(vCursorTileFloat.x));
+    m_vCursorTile.y = vCursorTileFloat.y < 0.0 ? (int32_t)(vCursorTileFloat.y - 1) : (int32_t(vCursorTileFloat.y));
+    m_vecDebugInfo[1] = "Current cursor tile: " + glm::to_string(m_vCursorTile);
 }
 
 
@@ -213,6 +230,8 @@ void Game::RenderGame()
 
     if (m_bShowWorld)
         cWorld.Draw(cRenderer);
+
+    cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
 
     if (m_bShowCharacter)
     pPlayer->Draw(cRenderer, cWorld);
@@ -265,6 +284,9 @@ void Game::RenderUI()
         ImGui::Checkbox("Show character", &m_bShowCharacter);
         ImGui::Checkbox("Toggle player state", &bPlayerIdle);
 
+        for (auto &s : m_vecDebugInfo)
+            ImGui::Text(s.c_str());
+
         for (auto &s : cWorld.vecDebugInfo)
             ImGui::Text(s.c_str());
 
@@ -307,12 +329,19 @@ void Game::SetDeltaTime()
 
 
 
-glm::vec2 Game::GetCursorPos()
+glm::vec2 Game::GetCursorScreenPos()
 {
     glm::dvec2 dvPos;
     glfwGetCursorPos(pWindow, &dvPos.x, &dvPos.y);
 
     return glm::vec2(dvPos);
+}
+
+
+
+glm::vec2 Game::GetCursorWorldPos()
+{
+    return cWorld.ScreenToWorld(GetCursorScreenPos());
 }
 
 
@@ -397,7 +426,7 @@ void Game::ProcessInput()
 
 void Game::ProcessMouseInput()
 {
-    glm::vec2 vPos = GetCursorPos();
+    glm::vec2 vPos = GetCursorScreenPos();
     if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         if (bPanning)
@@ -418,35 +447,6 @@ void Game::ProcessMouseInput()
         cWorld.EndPan(vPos);
         bPanning = false;
     }
-}
-
-
-
-
-/*********************************/
-/*                               */
-/*        L:Console Debug        */
-/*                               */
-/*********************************/
-void Game::DebugAddVec2(const char* str, glm::vec2 vVec)
-{
-    std::string sLine(str);
-    sLine += glm::to_string(vVec);
-    vecDebugMessage.push_back(sLine);
-}
-
-
-
-/*******************************/
-/*                             */
-/*        L:Print Debug        */
-/*                             */
-/*******************************/
-void Game::PrintDebug()
-{
-//    glm::vec2 vCursorPos = GetCursorPos();
-//    std::cout << "Mouse Pos - Screen: " << glm::to_string(vCursorPos) << " ---- World: "
-//              << glm::to_string(cWorld.ScreenToWorld(vCursorPos)) << "\r" << std::flush;
 }
 
 
@@ -495,9 +495,9 @@ void Game::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
     Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
 
     if (yoffset > 0)
-        pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorPos());
+        pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorScreenPos());
     else
-        pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorPos());
+        pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorScreenPos());
 }
 
 
