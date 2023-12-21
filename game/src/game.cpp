@@ -231,10 +231,13 @@ void Game::RenderGame()
     if (m_bShowWorld)
         cWorld.Draw(cRenderer);
 
-    cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
+    if (m_bErase)
+        cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
+    else
+        cWorld.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale(), glm::vec2(0.1f), cWorld.aTexOffsets[cWorld.nCurTexOffset]);
 
     if (m_bShowCharacter)
-    pPlayer->Draw(cRenderer, cWorld);
+        pPlayer->Draw(cRenderer, cWorld);
 }
 
 
@@ -420,14 +423,28 @@ void Game::ProcessInput()
     {
         pPlayer->SetState(CharacterState::IDLE);
     }
+
+    if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        m_bTileSelectMod = true;
+    }
+    else
+    {
+        m_bTileSelectMod = false;
+    }
 }
 
 
 
+/***************************************/
+/*                                     */
+/*        L:Process Mouse Input        */
+/*                                     */
+/***************************************/
 void Game::ProcessMouseInput()
 {
     glm::vec2 vPos = GetCursorScreenPos();
-    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
     {
         if (bPanning)
         {
@@ -446,6 +463,21 @@ void Game::ProcessMouseInput()
     {
         cWorld.EndPan(vPos);
         bPanning = false;
+    }
+
+    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+        m_bErase = true;
+    else
+        m_bErase = false;
+
+    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cWorld.EmptyTile(m_vCursorTile))
+    {
+        cWorld.AddTile(m_vCursorTile);
+    }
+
+    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cWorld.EmptyTile(m_vCursorTile))
+    {
+        cWorld.RemoveTile(m_vCursorTile);
     }
 }
 
@@ -486,6 +518,34 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
     {
         pGame->cWorld.SetWorldOffset(glm::vec2(0.0f));
     }
+
+    if (key == GLFW_KEY_E && action == GLFW_PRESS)
+    {
+        if (++pGame->cWorld.nCurTexOffset >= pGame->cWorld.aTexOffsets.size())
+            pGame->cWorld.nCurTexOffset = 0;
+    }
+
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+    {
+        if (--pGame->cWorld.nCurTexOffset < 0)
+            pGame->cWorld.nCurTexOffset = pGame->cWorld.aTexOffsets.size() - 1;
+    }
+
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+    {
+        std::stringstream ss;
+        ss << "world_" << pGame->nCurFileNum << ".txt";
+        std::string sFilename = ss.str();
+        std::cout << "Filename: " << sFilename << std::endl;
+        while (!pGame->cWorld.SaveToFile(sFilename))
+        {
+            pGame->nCurFileNum++;
+            std::stringstream ss;
+            ss << "world_" << pGame->nCurFileNum << ".txt";
+            sFilename = ss.str();
+            std::cout << "Filename: " << sFilename << std::endl;
+        }
+    }
 }
 
 
@@ -494,10 +554,26 @@ void Game::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
 {
     Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
 
-    if (yoffset > 0)
-        pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorScreenPos());
+    if (pGame->m_bTileSelectMod)
+    {
+        if (yoffset > 0)
+        {
+            if (++pGame->cWorld.nCurTexOffset >= pGame->cWorld.aTexOffsets.size())
+                pGame->cWorld.nCurTexOffset = 0;
+        }
+        else
+        {
+            if (--pGame->cWorld.nCurTexOffset < 0)
+                pGame->cWorld.nCurTexOffset = pGame->cWorld.aTexOffsets.size() - 1;
+        }
+    }
     else
-        pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorScreenPos());
+    {
+        if (yoffset > 0)
+            pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorScreenPos());
+        else
+            pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorScreenPos());
+    }
 }
 
 

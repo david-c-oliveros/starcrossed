@@ -5,7 +5,6 @@
 Character::Character(glm::vec2 _vWorldPos)
     : Entity(_vWorldPos)
 {
-    vecDebugInfo = { "Character", "" };
     vecDebugInfo.push_back("Character");
     for (int i = 0; i < 8; i++)
         vecDebugInfo.push_back("");

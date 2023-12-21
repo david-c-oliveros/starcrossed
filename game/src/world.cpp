@@ -11,7 +11,30 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     vecDebugInfo[0] = "World";
 
     pSpriteSpaceship = std::make_unique<Sprite>("spaceship_sheet");
-    LoadMap("../../res/map_01.txt");
+
+    uint32_t nSheetWidth = 10;
+    uint32_t nSheetHeight = 8;
+
+    for (uint32_t y = 0; y < nSheetHeight; y++)
+    {
+        for (uint32_t x = 0; x < nSheetWidth; x++)
+        {
+            aTexOffsets[y * nSheetWidth + x] = glm::ivec2(x, y);
+        }
+    }
+
+    cEmptyTileSprite.SetColor(glm::vec3(0.15f, 0.22f, 0.5f));
+
+//    LoadFromFile("../../res/map_01.txt");
+
+    Room r(glm::ivec2(0));
+
+    r.vDim = glm::ivec2(64);
+    vecRooms.push_back(r);
+
+    for (int y = 0; y < r.vDim.y; y++)
+        for (int x = 0; x < r.vDim.x; x++)
+            vecRooms[0].vecTiles.push_back(Tile(glm::ivec2(x, y)));
 
     return true;
 }
@@ -22,29 +45,103 @@ void World::Draw(SpriteRenderer &cRenderer)
 {
     for (auto &r : vecRooms)
     {
-        for (auto &t : r->vecTiles)
+        for (auto &t : r.vecTiles)
         {
-            glm::vec2 vTileScreenPos = WorldToScreen(t->vWorldPos);
+            glm::vec2 vTileScreenPos = WorldToScreen(t.vWorldPos);
             glm::vec2 vScalar = m_vWorldScale;
 
-            pSpriteSpaceship->Draw(cRenderer, vTileScreenPos, vScalar, glm::vec2(0.1f), t->vTexOffset);
+            if (!t.bEmpty)
+                pSpriteSpaceship->Draw(cRenderer, vTileScreenPos, vScalar, glm::vec2(0.1f), t.vTexOffset);
+            else
+                cEmptyTileSprite.DrawColored(cRenderer, vTileScreenPos, vScalar);
         }
     }
 }
 
 
 
-void World::LoadMap(const char* cMapFile)
+bool World::EmptyTile(glm::ivec2 vTilePos)
+{
+    return vecRooms[0].vecTiles[vTilePos.y * vecRooms[0].vDim.x + vTilePos.x].bEmpty;
+}
+
+
+
+void World::AddTile(glm::ivec2 vTilePos)
+{
+    std::cout << "Adding tile at position " << glm::to_string(vTilePos) << std::endl;
+    if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
+        vTilePos.x < vecRooms[0].vDim.x &&
+        vTilePos.y < vecRooms[0].vDim.y)
+    {
+        uint32_t nIndex = vTilePos.y * vecRooms[0].vDim.x + vTilePos.x;
+        vecRooms[0].vecTiles[nIndex].bEmpty = false;
+        vecRooms[0].vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
+    }
+}
+
+
+
+void World::RemoveTile(glm::ivec2 vTilePos)
+{
+    if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
+        vTilePos.x < vecRooms[0].vDim.x &&
+        vTilePos.y < vecRooms[0].vDim.y)
+    {
+        uint32_t nIndex = vTilePos.y * vecRooms[0].vDim.x + vTilePos.x;
+        vecRooms[0].vecTiles[nIndex].bEmpty = true;
+        vecRooms[0].vecTiles[nIndex].vTexOffset = glm::vec2(0);
+    }
+}
+
+
+
+bool World::SaveToFile(std::string sFilename)
+{
+    if (std::filesystem::exists(sFilename))
+    {
+        std::cerr << sFilename << " already exists" << std::endl;
+        return false;
+    }
+
+    std::ofstream fOutFile;
+    fOutFile.open(sFilename);
+
+    for (auto &r : vecRooms)
+    {
+        for (auto &t : r.vecTiles)
+        {
+            if (t.bEmpty)
+            {
+                fOutFile << "#";
+                continue;
+            }
+
+            std::stringstream ss;
+            ss << std::hex << t.vTexOffset.x;
+            ss << std::hex << t.vTexOffset.y;
+            fOutFile << ss.str();
+        }
+    }
+
+    fOutFile.close();
+
+    return true;
+}
+
+
+
+void World::LoadFromFile(const char* cFilename)
 {
     // TEMP - Currently only loads one room
-    vecRooms.push_back(std::make_unique<Room>(glm::ivec2(0)));
+    vecRooms.push_back(Room(glm::ivec2(0)));
 
     glm::ivec2 vDim(0, 0);
 
     std::ifstream fin;
-    if (std::filesystem::exists(cMapFile))
+    if (std::filesystem::exists(cFilename))
     {
-        fin.open(cMapFile);
+        fin.open(cFilename);
     }
 
     std::vector<std::vector<char>> vecMap;
@@ -72,33 +169,37 @@ void World::LoadMap(const char* cMapFile)
     {
         for (int x = 0; x < vecMap[y].size(); x++)
         {
-            std::unique_ptr<Tile> pTile = std::make_unique<Tile>(glm::vec2(x, y) * BASE_TILE_SIZE +
-                                          (glm::vec2)vecRooms[0]->vUpperLeftPos * BASE_TILE_SIZE);
+            Tile pTile(glm::vec2(x, y) * BASE_TILE_SIZE + (glm::vec2)vecRooms[0].vUpperLeftPos * BASE_TILE_SIZE);
+
             if (vecMap[y][x] == '.')
-                pTile->vTexOffset = glm::vec2(1, 1);
+                pTile.vTexOffset = glm::vec2(1, 1);
             else if (vecMap[y][x] == '#' && x == 0 && y == 0)
-                pTile->vTexOffset = glm::vec2(3, 0);
+                pTile.vTexOffset = glm::vec2(3, 0);
 
             else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == 0)
-                pTile->vTexOffset = glm::vec2(5, 0);
+                pTile.vTexOffset = glm::vec2(5, 0);
             else if (vecMap[y][x] == '#' && x == 0 && y == vecMap.size() - 1)
-                pTile->vTexOffset = glm::vec2(3, 2);
+                pTile.vTexOffset = glm::vec2(3, 2);
 
             else if (vecMap[y][x] == '#' && x == 0)
-                pTile->vTexOffset = glm::vec2(3, 1);
+                pTile.vTexOffset = glm::vec2(3, 1);
             else if (vecMap[y][x] == '#' && y == 0)
-                pTile->vTexOffset = glm::vec2(4, 0);
+                pTile.vTexOffset = glm::vec2(4, 0);
 
             else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == vecMap.size() - 1)
-                pTile->vTexOffset = glm::vec2(5, 2);
+                pTile.vTexOffset = glm::vec2(5, 2);
             else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1)
-                pTile->vTexOffset = glm::vec2(5, 1);
+                pTile.vTexOffset = glm::vec2(5, 1);
             else if (vecMap[y][x] == '#' && y == vecMap.size() - 1)
-                pTile->vTexOffset = glm::vec2(4, 2);
+                pTile.vTexOffset = glm::vec2(4, 2);
 
-            vecRooms[0]->vecTiles.push_back(std::move(pTile));
+            vecRooms[0].vecTiles.push_back(pTile);
+        vecRooms[0].vDim.x = x;
         }
+        vecRooms[0].vDim.y = y;
     }
+
+    std::cout << "World size: " << glm::to_string(vecRooms[0].vDim) << std::endl;
 }
 
 

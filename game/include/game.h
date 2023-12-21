@@ -72,7 +72,6 @@ class Game
         bool bPanning = false;
         bool bPlayerIdle = true;
 
-
     private:
         std::vector<std::string> vecDebugMessage;
         const char* glsl_version = "#version 330";
@@ -84,6 +83,13 @@ class Game
 
         bool m_bShowWorld = true;
         bool m_bShowCharacter = true;
+
+        /****************************/
+        /*        Map Editor        */
+        /****************************/
+        bool m_bTileSelectMod = false;
+        bool m_bErase = false;
+        uint32_t nCurFileNum = 0;
 
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
         glm::ivec2 m_vCursorTile;

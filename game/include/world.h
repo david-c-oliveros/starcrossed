@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <memory>
 #include <filesystem>
 
@@ -17,6 +18,7 @@ struct Tile
     glm::vec2 vWorldPos;
     glm::vec2 vTexOffset;
     std::string sTexName;
+    bool bEmpty = true;
 };
 
 
@@ -29,7 +31,7 @@ struct Room
     glm::ivec2 vDim;
     glm::ivec2 vUpperLeftPos;
 
-    std::vector<std::unique_ptr<Tile>> vecTiles;
+    std::vector<Tile> vecTiles;
 };
 
 
@@ -42,7 +44,13 @@ class World
 
         bool Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale = glm::vec2(1.0f));
         void Draw(SpriteRenderer &cRenderer);
-        void LoadMap(const char* cFile);
+
+        bool EmptyTile(glm::ivec2 vTilePos);
+        void AddTile(glm::ivec2 vTilePos);
+        void RemoveTile(glm::ivec2 vTilePos);
+
+        void LoadFromFile(const char* cFilename);
+        bool SaveToFile(std::string sFilename);
 
         void SetWorldOffset(const glm::vec2& vOffset);
         void MoveWorldOffset(const glm::vec2& vDeltaOffset);
@@ -73,9 +81,13 @@ class World
 
 
     public:
-        std::vector<std::unique_ptr<Room>> vecRooms;
+        std::vector<Room> vecRooms;
 
         std::vector<std::string> vecDebugInfo = std::vector<std::string>(10);
+        std::unique_ptr<Sprite> pSpriteSpaceship;
+
+        std::array<glm::ivec2, 80> aTexOffsets;
+        int32_t nCurTexOffset = 0;
 
     private:
         glm::vec2 m_vWorldOffset = glm::vec2(0.0f);
@@ -88,6 +100,6 @@ class World
 
 
         // TEMP!!!
-        std::unique_ptr<Sprite> pSpriteSpaceship;
+        Sprite cEmptyTileSprite;
         std::unique_ptr<Sprite> pSprite;
 };
