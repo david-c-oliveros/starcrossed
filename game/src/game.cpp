@@ -54,6 +54,7 @@ bool Game::Create()
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
 
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
+    cWorld.LoadFromFile("world_0.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
     pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));

@@ -17,7 +17,6 @@ struct Tile
 
     glm::vec2 vWorldPos;
     glm::vec2 vTexOffset;
-    std::string sTexName;
     bool bEmpty = true;
 };
 
@@ -102,4 +101,6 @@ class World
         // TEMP!!!
         Sprite cEmptyTileSprite;
         std::unique_ptr<Sprite> pSprite;
+
+        void printWorld(std::vector<std::string> vecWorld);
 };

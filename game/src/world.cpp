@@ -25,16 +25,14 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
 
     cEmptyTileSprite.SetColor(glm::vec3(0.15f, 0.22f, 0.5f));
 
-//    LoadFromFile("../../res/map_01.txt");
-
     Room r(glm::ivec2(0));
 
     r.vDim = glm::ivec2(64);
     vecRooms.push_back(r);
 
-    for (int y = 0; y < r.vDim.y; y++)
-        for (int x = 0; x < r.vDim.x; x++)
-            vecRooms[0].vecTiles.push_back(Tile(glm::ivec2(x, y)));
+//    for (int y = 0; y < r.vDim.y; y++)
+//        for (int x = 0; x < r.vDim.x; x++)
+//            vecRooms[0].vecTiles.push_back(Tile(glm::ivec2(x, y)));
 
     return true;
 }
@@ -109,6 +107,14 @@ bool World::SaveToFile(std::string sFilename)
 
     for (auto &r : vecRooms)
     {
+        /***************************************/
+        /*        Write room dimensions        */
+        /***************************************/
+        std::stringstream ssa;
+        ssa << "x" << std::hex << r.vDim.x << "y" << std::hex << r.vDim.y;
+        ssa << "t";
+
+        fOutFile << ssa.str();
         for (auto &t : r.vecTiles)
         {
             if (t.bEmpty)
@@ -117,6 +123,9 @@ bool World::SaveToFile(std::string sFilename)
                 continue;
             }
 
+            /**********************************/
+            /*        Write room tiles        */
+            /**********************************/
             std::stringstream ss;
             ss << std::hex << t.vTexOffset.x;
             ss << std::hex << t.vTexOffset.y;
@@ -144,62 +153,119 @@ void World::LoadFromFile(const char* cFilename)
         fin.open(cFilename);
     }
 
-    std::vector<std::vector<char>> vecMap;
+    std::vector<std::string> vecWorld;
     std::string sLine;
 
-    uint32_t x = 0;
-    uint32_t y = 0;
+    /**************************************************/
+    /*    Read file into an std::vector of strings    */
+    /**************************************************/
     while(fin >> sLine)
     {
         std::stringstream ss;
         ss << sLine;
         char c;
-        std::vector<char> vec;
+
         while(ss.get(c))
         {
-            vec.push_back(c);
-            x++;
-        }
-        vecMap.push_back(vec);
-        y++;
-    }
+            uint32_t nElementSize = 0;
 
-    // TODO - Please CLEAN UP THIS MESS!!
-    for (int y = 0; y < vecMap.size(); y++)
+            if (c == 't')
+                continue;
+
+            if (c == '#')
+                nElementSize = 1;
+            else if (c == 'x' || c == 'y')
+                nElementSize = 3;
+            else
+                nElementSize = 2;
+
+            std::stringstream ssa;
+            ssa << c;
+            for (int32_t i = 1; i < nElementSize; i++)
+            {
+                ss.get(c);
+                ssa << c;
+            }
+            vecWorld.push_back(ssa.str());
+        }
+    }
+    
+    printWorld(vecWorld);
+
+    /****************************************************/
+    /*    Generate world from std::vector of strings    */
+    /****************************************************/
+    /*    Format is "x--y--t"
+     *    'x' -> Indicates width of room
+     *    'y' -> Indicates height of room
+     *    't' -> Indicates that the remaining
+     *           char's will be tile data,
+     *           until another 'r' is read
+     *    '-' -> A single hex digit each
+     */
+    /*****************************/
+    /*    Read dimension data    */
+    /*****************************/
+    std::stringstream ss;
+    std::stringstream ssa;
+    ss << vecWorld[0][1] << vecWorld[0][2];
+    ssa << std::hex << ss.str();
+    ssa >> vecRooms[0].vDim.x;
+
+    ss.str("");
+    ssa.str("");
+    ss.clear();
+    ssa.clear();
+
+    ss << vecWorld[1][1] << vecWorld[1][2];
+    ssa << std::hex << ss.str();
+    ssa >> vecRooms[0].vDim.y;
+
+    /************************/
+    /*    Read tile data    */
+    /************************/
+    int32_t i = 2;
+    int32_t nEmptyTiles = 0;
+    int32_t nNonEmptyTiles = 0;
+    for (int32_t y = 0; y < vecRooms[0].vDim.y; y++)
     {
-        for (int x = 0; x < vecMap[y].size(); x++)
+        for (int32_t x = 0; x < vecRooms[0].vDim.x; x++)
         {
-            Tile pTile(glm::vec2(x, y) * BASE_TILE_SIZE + (glm::vec2)vecRooms[0].vUpperLeftPos * BASE_TILE_SIZE);
+            if (vecWorld[i] == "#")
+            {
+                Tile t(glm::ivec2(x, y));
+                vecRooms[0].vecTiles.push_back(t);
+                i++;
+                nEmptyTiles++;
+                continue;
+            }
 
-            if (vecMap[y][x] == '.')
-                pTile.vTexOffset = glm::vec2(1, 1);
-            else if (vecMap[y][x] == '#' && x == 0 && y == 0)
-                pTile.vTexOffset = glm::vec2(3, 0);
+            glm::ivec2 _vTexOffset;
+            std::stringstream ss;
+            std::stringstream ssa;
+            ss << vecWorld[i][0];
+            ssa << std::hex << ss.str();
+            ssa >> _vTexOffset.x;
 
-            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == 0)
-                pTile.vTexOffset = glm::vec2(5, 0);
-            else if (vecMap[y][x] == '#' && x == 0 && y == vecMap.size() - 1)
-                pTile.vTexOffset = glm::vec2(3, 2);
+            ss.str("");
+            ssa.str("");
+            ss.clear();
+            ssa.clear();
 
-            else if (vecMap[y][x] == '#' && x == 0)
-                pTile.vTexOffset = glm::vec2(3, 1);
-            else if (vecMap[y][x] == '#' && y == 0)
-                pTile.vTexOffset = glm::vec2(4, 0);
+            ss << vecWorld[i][1];
+            ssa << std::hex << ss.str();
+            ssa >> _vTexOffset.y;
 
-            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1 && y == vecMap.size() - 1)
-                pTile.vTexOffset = glm::vec2(5, 2);
-            else if (vecMap[y][x] == '#' && x == vecMap[y].size() - 1)
-                pTile.vTexOffset = glm::vec2(5, 1);
-            else if (vecMap[y][x] == '#' && y == vecMap.size() - 1)
-                pTile.vTexOffset = glm::vec2(4, 2);
+            Tile t(glm::ivec2(x, y));
+            t.vTexOffset = _vTexOffset;
+            t.bEmpty = false;
+            nNonEmptyTiles++;
 
-            vecRooms[0].vecTiles.push_back(pTile);
-        vecRooms[0].vDim.x = x;
+            vecRooms[0].vecTiles.push_back(t);
+
+            i++;
         }
-        vecRooms[0].vDim.y = y;
     }
-
-    std::cout << "World size: " << glm::to_string(vecRooms[0].vDim) << std::endl;
 }
 
 
@@ -358,4 +424,15 @@ bool World::IsRectVisible(const glm::vec2& vPos, const glm::vec2& vSize) const
     glm::ivec2 vScreenSize = vSize * m_vWorldScale;
     return (vScreenPos.x < 0 + m_vViewArea.x && vScreenPos.x + vScreenSize.x > 0 &&
             vScreenPos.y < m_vViewArea.y && vScreenPos.y + vScreenSize.y > 0);
+}
+
+
+
+void World::printWorld(std::vector<std::string> vecWorld)
+{
+    for (auto &e : vecWorld)
+    {
+        std::cout << e << "  ";
+    }
+    std::cout << std::endl;
 }
