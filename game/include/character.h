@@ -33,6 +33,7 @@ class Character : public Entity
         void StartSpriteAnim();
         void Update();
         void Move(Direction _eDir);
+        void SetMoveSpeedScalar(float _fSpeedScalar);
 
 
     public:
@@ -52,4 +53,5 @@ class Character : public Entity
 
     private:
         std::string m_sCurSpriteName;
+        float m_fMoveSpeedScalar;
 };

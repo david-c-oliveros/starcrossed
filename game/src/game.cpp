@@ -45,47 +45,15 @@ bool Game::Create()
     LoadResources();
 
     m_vecDebugInfo = { "Game Debug:" };
-
     for (int i = 0; i < 8; i++)
         m_vecDebugInfo.push_back("");
+
+    SetGameState(GameState::PLAY);
+    ConfigEntities();
 
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 vOrigin = glm::vec3(0.0f);
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
-
-    cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
-    cWorld.LoadFromFile("world_0.txt");
-    cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
-
-    pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
-
-    pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
-    pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
-    pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
-    pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
-
-    pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
-    pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
-    pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
-    pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
-
-    // TPF -> Ticks Per Frame
-    uint32_t nTPF = 4;
-    uint32_t nNumFrames = 10;
-    pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(2.0f));
-
-    nTPF = 8;
-    nNumFrames = 7;
-    pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
-    pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(2.0f));
-
-    pPlayer->SetState(CharacterState::IDLE);
-    pPlayer->StartSpriteAnim();
 
     return true;
 }
@@ -229,16 +197,16 @@ void Game::RenderGame()
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
-    if (m_bShowWorld)
-        cWorld.Draw(cRenderer);
+    cWorld.Draw(cRenderer);
+    pPlayer->Draw(cRenderer, cWorld);
 
-    if (m_bErase)
-        cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
-    else
-        cWorld.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale(), glm::vec2(0.1f), cWorld.aTexOffsets[cWorld.nCurTexOffset]);
-
-    if (m_bShowCharacter)
-        pPlayer->Draw(cRenderer, cWorld);
+    if (m_eGameState == GameState::LEVEL_EDIT)
+    {
+        if (m_bErase)
+            cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
+        else
+            cWorld.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale(), glm::vec2(0.1f), cWorld.aTexOffsets[cWorld.nCurTexOffset]);
+    }
 }
 
 
@@ -284,8 +252,6 @@ void Game::RenderUI()
     {
         ImGui::Begin("Debug");
         
-        ImGui::Checkbox("Show map", &m_bShowWorld);
-        ImGui::Checkbox("Show character", &m_bShowCharacter);
         ImGui::Checkbox("Toggle player state", &bPlayerIdle);
 
         for (auto &s : m_vecDebugInfo)
@@ -320,6 +286,14 @@ void Game::SetDeltaTime()
     float fCurFrame = static_cast<float>(glfwGetTime());
     fDeltaTime = fCurFrame - fLastFrame;
     fLastFrame = fCurFrame;
+}
+
+
+
+void Game::SetGameState(GameState _eState)
+{
+    m_eGameState = _eState;
+    cWorld.SetGameState(_eState);
 }
 
 
@@ -386,6 +360,46 @@ void Game::LoadResources()
 
 
 
+void Game::ConfigEntities()
+{
+    cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
+    cWorld.LoadFromFile("world_1.txt");
+    cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
+
+    pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
+
+    pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
+    pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
+    pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
+    pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
+
+    pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
+    pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
+    pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
+    pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
+
+    // TPF -> Ticks Per Frame
+    uint32_t nTPF = 2;
+    uint32_t nNumFrames = 10;
+    pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+
+    nTPF = 8;
+    nNumFrames = 7;
+    pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+
+    pPlayer->SetMoveSpeedScalar(0.050f);
+    pPlayer->SetState(CharacterState::IDLE);
+    pPlayer->StartSpriteAnim();
+}
+
+
+
 void Game::PrintVar(int32_t var)
 {
     std::cout << var << std::endl;
@@ -425,13 +439,16 @@ void Game::ProcessInput()
         pPlayer->SetState(CharacterState::IDLE);
     }
 
-    if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (m_eGameState == GameState::LEVEL_EDIT)
     {
-        m_bTileSelectMod = true;
-    }
-    else
-    {
-        m_bTileSelectMod = false;
+        if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        {
+            m_bTileSelectMod = true;
+        }
+        else
+        {
+            m_bTileSelectMod = false;
+        }
     }
 }
 
@@ -458,7 +475,6 @@ void Game::ProcessMouseInput()
             cWorld.StartPan(vPos);
             bPanning = true;
         }
-
     }
     else if (bPanning)
     {
@@ -466,19 +482,22 @@ void Game::ProcessMouseInput()
         bPanning = false;
     }
 
-    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-        m_bErase = true;
-    else
-        m_bErase = false;
-
-    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cWorld.EmptyTile(m_vCursorTile))
+    if (m_eGameState == GameState::LEVEL_EDIT)
     {
-        cWorld.AddTile(m_vCursorTile);
-    }
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+            m_bErase = true;
+        else
+            m_bErase = false;
 
-    if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cWorld.EmptyTile(m_vCursorTile))
-    {
-        cWorld.RemoveTile(m_vCursorTile);
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cWorld.EmptyTile(m_vCursorTile))
+        {
+            cWorld.AddTile(m_vCursorTile);
+        }
+
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cWorld.EmptyTile(m_vCursorTile))
+        {
+            cWorld.RemoveTile(m_vCursorTile);
+        }
     }
 }
 

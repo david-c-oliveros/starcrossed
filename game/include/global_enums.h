@@ -9,3 +9,11 @@ enum class Direction
     LEFT,
     RIGHT
 };
+
+
+
+enum class GameState
+{
+    LEVEL_EDIT,
+    PLAY
+};

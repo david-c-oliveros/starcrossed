@@ -5,6 +5,7 @@
 #include <memory>
 #include <filesystem>
 
+#include "global_enums.h"
 #include "sprite.h"
 #include "sprite_renderer.h"
 
@@ -48,8 +49,10 @@ class World
         void AddTile(glm::ivec2 vTilePos);
         void RemoveTile(glm::ivec2 vTilePos);
 
-        void LoadFromFile(const char* cFilename);
         bool SaveToFile(std::string sFilename);
+        void LoadFromFile(const char* cFilename);
+
+        void SetGameState(GameState _eState);
 
         void SetWorldOffset(const glm::vec2& vOffset);
         void MoveWorldOffset(const glm::vec2& vDeltaOffset);
@@ -97,10 +100,9 @@ class World
         glm::vec2 m_vStartPan    = glm::vec2(0.0f);
         glm::ivec2 m_vViewArea;
 
+        GameState m_eGameState;
 
         // TEMP!!!
         Sprite cEmptyTileSprite;
         std::unique_ptr<Sprite> pSprite;
-
-        void printWorld(std::vector<std::string> vecWorld);
 };

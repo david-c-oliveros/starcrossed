@@ -37,7 +37,9 @@ class Game
         void RenderGame();
         void RenderUI();
         void SetDeltaTime();
+        void SetGameState(GameState _eState);
         void LoadResources();
+        void ConfigEntities();
 
         void ProcessInput();
         void ProcessMouseInput();
@@ -73,7 +75,6 @@ class Game
         bool bPlayerIdle = true;
 
     private:
-        std::vector<std::string> vecDebugMessage;
         const char* glsl_version = "#version 330";
 
         ImGuiIO io;
@@ -81,8 +82,7 @@ class Game
         bool m_bShowUIWindow;
         bool m_bShowDebugInfo = true;
 
-        bool m_bShowWorld = true;
-        bool m_bShowCharacter = true;
+        GameState m_eGameState = GameState::PLAY;
 
         /****************************/
         /*        Map Editor        */

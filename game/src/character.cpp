@@ -6,7 +6,7 @@ Character::Character(glm::vec2 _vWorldPos)
     : Entity(_vWorldPos)
 {
     vecDebugInfo.push_back("Character");
-    for (int i = 0; i < 8; i++)
+    for (int32_t i = 0; i < 8; i++)
         vecDebugInfo.push_back("");
 
     aDirs = { glm::ivec2(0, -1), glm::ivec2(0, 1), glm::ivec2(-1, 0), glm::ivec2(1, 0) };
@@ -83,10 +83,16 @@ void Character::Update()
 
 void Character::Move(Direction _eDir)
 {
-    float fSpeedScalar = 0.027;
-    vWorldPos += aDirs[(int32_t)_eDir] * fSpeedScalar;
+    vWorldPos += aDirs[(int32_t)_eDir] * m_fMoveSpeedScalar;
     SetDir(_eDir);
     SetState(CharacterState::WALK);
+}
+
+
+
+void Character::SetMoveSpeedScalar(float _fSpeedScalar)
+{
+    m_fMoveSpeedScalar = _fSpeedScalar;
 }
 
 

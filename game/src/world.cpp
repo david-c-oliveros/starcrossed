@@ -30,10 +30,6 @@ bool World::Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale)
     r.vDim = glm::ivec2(64);
     vecRooms.push_back(r);
 
-//    for (int y = 0; y < r.vDim.y; y++)
-//        for (int x = 0; x < r.vDim.x; x++)
-//            vecRooms[0].vecTiles.push_back(Tile(glm::ivec2(x, y)));
-
     return true;
 }
 
@@ -50,7 +46,7 @@ void World::Draw(SpriteRenderer &cRenderer)
 
             if (!t.bEmpty)
                 pSpriteSpaceship->Draw(cRenderer, vTileScreenPos, vScalar, glm::vec2(0.1f), t.vTexOffset);
-            else
+            else if (m_eGameState == GameState::LEVEL_EDIT)
                 cEmptyTileSprite.DrawColored(cRenderer, vTileScreenPos, vScalar);
         }
     }
@@ -67,7 +63,6 @@ bool World::EmptyTile(glm::ivec2 vTilePos)
 
 void World::AddTile(glm::ivec2 vTilePos)
 {
-    std::cout << "Adding tile at position " << glm::to_string(vTilePos) << std::endl;
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
         vTilePos.x < vecRooms[0].vDim.x &&
         vTilePos.y < vecRooms[0].vDim.y)
@@ -189,8 +184,6 @@ void World::LoadFromFile(const char* cFilename)
             vecWorld.push_back(ssa.str());
         }
     }
-    
-    printWorld(vecWorld);
 
     /****************************************************/
     /*    Generate world from std::vector of strings    */
@@ -266,6 +259,13 @@ void World::LoadFromFile(const char* cFilename)
             i++;
         }
     }
+}
+
+
+
+void World::SetGameState(GameState _eState)
+{
+    m_eGameState = _eState;
 }
 
 
@@ -424,15 +424,4 @@ bool World::IsRectVisible(const glm::vec2& vPos, const glm::vec2& vSize) const
     glm::ivec2 vScreenSize = vSize * m_vWorldScale;
     return (vScreenPos.x < 0 + m_vViewArea.x && vScreenPos.x + vScreenSize.x > 0 &&
             vScreenPos.y < m_vViewArea.y && vScreenPos.y + vScreenSize.y > 0);
-}
-
-
-
-void World::printWorld(std::vector<std::string> vecWorld)
-{
-    for (auto &e : vecWorld)
-    {
-        std::cout << e << "  ";
-    }
-    std::cout << std::endl;
 }

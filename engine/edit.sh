@@ -1,3 +1,8 @@
 #! /bin/sh
 
-vim -p src/$1.cpp include/$1.h
+args=""
+for file in "$@"; do
+    args+=" src/$file.cpp include/$file.h"
+done
+
+vim -p $args
