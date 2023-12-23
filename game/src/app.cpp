@@ -1,4 +1,4 @@
-#include "game.h"
+#include "app.h"
 
 
 
@@ -15,14 +15,14 @@ glm::vec2 vOffset = glm::vec2(0.0f);
 
 
 
-Game::Game(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
+App::App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight)
     : nCanvasWidth(_nCanvasWidth), nCanvasHeight(_nCanvasHeight)
 {
 }
 
 
 
-Game::~Game()
+App::~App()
 {
     glfwTerminate();
 }
@@ -34,7 +34,7 @@ Game::~Game()
 /*        L:Create        */
 /*                        */
 /**************************/
-bool Game::Create()
+bool App::Create()
 {
     if (!GLInit())
         return false;
@@ -44,11 +44,11 @@ bool Game::Create()
 
     LoadResources();
 
-    m_vecDebugInfo = { "Game Debug:" };
+    m_vecDebugInfo = { "App Debug:" };
     for (int i = 0; i < 8; i++)
         m_vecDebugInfo.push_back("");
 
-    SetGameState(GameState::PLAY);
+    SetAppState(AppState::PLAY);
     ConfigEntities();
 
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -60,7 +60,7 @@ bool Game::Create()
 
 
 
-void Game::Destroy()
+void App::Destroy()
 {
     cRenderer.Destroy();
     ResourceManager::Clear();
@@ -79,7 +79,7 @@ void Game::Destroy()
 /*        L:GLFW Init/Config        */
 /*                                  */
 /************************************/
-bool Game::GLInit()
+bool App::GLInit()
 {
     if (!Renderer::Init_GLFW(&pWindow, nCanvasWidth, nCanvasHeight))
     {
@@ -92,7 +92,7 @@ bool Game::GLInit()
 
 
 
-void Game::GLConfig()
+void App::GLConfig()
 {
     glfwSetFramebufferSizeCallback(pWindow, FramebufferSizeCallback);
 
@@ -117,14 +117,14 @@ void Game::GLConfig()
 /*        L:UI Config        */
 /*                           */
 /*****************************/
-void Game::UIConfig()
+void App::UIConfig()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     //ImGuiIO& io = ImGui::GetIO(); (void)io;
     io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableApppad;
 
     ImGui::StyleColorsDark();
 
@@ -139,7 +139,7 @@ void Game::UIConfig()
 /*        L:Update        */
 /*                        */
 /**************************/
-bool Game::Update()
+bool App::Update()
 {
     if(glfwWindowShouldClose(pWindow))
         return false;
@@ -150,7 +150,7 @@ bool Game::Update()
 
     pPlayer->Update();
 
-    RenderGame();
+    RenderApp();
     RenderUI();
     ProcessInput();
 
@@ -162,7 +162,7 @@ bool Game::Update()
 
 
 
-void Game::UpdateCursorTile()
+void App::UpdateCursorTile()
 {
     glm::vec2 vCursorTileFloat = GetCursorWorldPos() / BASE_TILE_SIZE;
     m_vCursorTile.x = vCursorTileFloat.x < 0.0 ? (int32_t)(vCursorTileFloat.x - 1) : (int32_t(vCursorTileFloat.x));
@@ -182,10 +182,10 @@ void Game::UpdateCursorTile()
 
 /*******************************/
 /*                             */
-/*        L:Render Game        */
+/*        L:Render App        */
 /*                             */
 /*******************************/
-void Game::RenderGame()
+void App::RenderApp()
 {
     Renderer::Clear(glm::vec4(0.0f, 0.0f, 0.21f, 1.0f));
 
@@ -200,7 +200,7 @@ void Game::RenderGame()
     cWorld.Draw(cRenderer);
     pPlayer->Draw(cRenderer, cWorld);
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (m_eAppState == AppState::LEVEL_EDIT)
     {
         if (m_bErase)
             cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
@@ -216,7 +216,7 @@ void Game::RenderGame()
 /*        L:Render UI        */
 /*                           */
 /*****************************/
-void Game::RenderUI()
+void App::RenderUI()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -281,7 +281,7 @@ void Game::RenderUI()
 /*        L:Set Delta Time        */
 /*                                */
 /**********************************/
-void Game::SetDeltaTime()
+void App::SetDeltaTime()
 {
     float fCurFrame = static_cast<float>(glfwGetTime());
     fDeltaTime = fCurFrame - fLastFrame;
@@ -290,10 +290,10 @@ void Game::SetDeltaTime()
 
 
 
-void Game::SetGameState(GameState _eState)
+void App::SetAppState(AppState _eState)
 {
-    m_eGameState = _eState;
-    cWorld.SetGameState(_eState);
+    m_eAppState = _eState;
+    cWorld.SetAppState(_eState);
 }
 
 
@@ -307,7 +307,7 @@ void Game::SetGameState(GameState _eState)
 
 
 
-glm::vec2 Game::GetCursorScreenPos()
+glm::vec2 App::GetCursorScreenPos()
 {
     glm::dvec2 dvPos;
     glfwGetCursorPos(pWindow, &dvPos.x, &dvPos.y);
@@ -317,7 +317,7 @@ glm::vec2 Game::GetCursorScreenPos()
 
 
 
-glm::vec2 Game::GetCursorWorldPos()
+glm::vec2 App::GetCursorWorldPos()
 {
     return cWorld.ScreenToWorld(GetCursorScreenPos());
 }
@@ -329,7 +329,7 @@ glm::vec2 Game::GetCursorWorldPos()
 /*        L:Load Resources        */
 /*                                */
 /**********************************/
-void Game::LoadResources()
+void App::LoadResources()
 {
     ResourceManager::LoadShader("../../shaders/sprite.vert", "../../shaders/sprite.frag", nullptr, "sprite");
     //ResourceManager::GetShader("sprite").Use();
@@ -360,7 +360,7 @@ void Game::LoadResources()
 
 
 
-void Game::ConfigEntities()
+void App::ConfigEntities()
 {
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
     cWorld.LoadFromFile("world_1.txt");
@@ -400,7 +400,7 @@ void Game::ConfigEntities()
 
 
 
-void Game::PrintVar(int32_t var)
+void App::PrintVar(int32_t var)
 {
     std::cout << var << std::endl;
 }
@@ -412,7 +412,7 @@ void Game::PrintVar(int32_t var)
 /*        L:Process Input        */
 /*                               */
 /*********************************/
-void Game::ProcessInput()
+void App::ProcessInput()
 {
     if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
         ProcessMouseInput();
@@ -439,7 +439,7 @@ void Game::ProcessInput()
         pPlayer->SetState(CharacterState::IDLE);
     }
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (m_eAppState == AppState::LEVEL_EDIT)
     {
         if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         {
@@ -459,7 +459,7 @@ void Game::ProcessInput()
 /*        L:Process Mouse Input        */
 /*                                     */
 /***************************************/
-void Game::ProcessMouseInput()
+void App::ProcessMouseInput()
 {
     glm::vec2 vPos = GetCursorScreenPos();
     if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
@@ -482,7 +482,7 @@ void Game::ProcessMouseInput()
         bPanning = false;
     }
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (m_eAppState == AppState::LEVEL_EDIT)
     {
         if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
             m_bErase = true;
@@ -525,9 +525,9 @@ void MouseCallback(GLFWwindow* pWindow, double fPosInX, double fPosInY)
 
 
 
-void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods)
+void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods)
 {
-    Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
+    App* pApp = static_cast<App*>(glfwGetWindowUserPointer(pWindow));
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
@@ -536,32 +536,32 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        pGame->cWorld.SetWorldOffset(glm::vec2(0.0f));
+        pApp->cWorld.SetWorldOffset(glm::vec2(0.0f));
     }
 
     if (key == GLFW_KEY_E && action == GLFW_PRESS)
     {
-        if (++pGame->cWorld.nCurTexOffset >= pGame->cWorld.aTexOffsets.size())
-            pGame->cWorld.nCurTexOffset = 0;
+        if (++pApp->cWorld.nCurTexOffset >= pApp->cWorld.aTexOffsets.size())
+            pApp->cWorld.nCurTexOffset = 0;
     }
 
     if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     {
-        if (--pGame->cWorld.nCurTexOffset < 0)
-            pGame->cWorld.nCurTexOffset = pGame->cWorld.aTexOffsets.size() - 1;
+        if (--pApp->cWorld.nCurTexOffset < 0)
+            pApp->cWorld.nCurTexOffset = pApp->cWorld.aTexOffsets.size() - 1;
     }
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
         std::stringstream ss;
-        ss << "world_" << pGame->nCurFileNum << ".txt";
+        ss << "world_" << pApp->nCurFileNum << ".txt";
         std::string sFilename = ss.str();
         std::cout << "Filename: " << sFilename << std::endl;
-        while (!pGame->cWorld.SaveToFile(sFilename))
+        while (!pApp->cWorld.SaveToFile(sFilename))
         {
-            pGame->nCurFileNum++;
+            pApp->nCurFileNum++;
             std::stringstream ss;
-            ss << "world_" << pGame->nCurFileNum << ".txt";
+            ss << "world_" << pApp->nCurFileNum << ".txt";
             sFilename = ss.str();
             std::cout << "Filename: " << sFilename << std::endl;
         }
@@ -570,35 +570,35 @@ void Game::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, i
 
 
 
-void Game::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
+void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
 {
-    Game* pGame = static_cast<Game*>(glfwGetWindowUserPointer(pWindow));
+    App* pApp = static_cast<App*>(glfwGetWindowUserPointer(pWindow));
 
-    if (pGame->m_bTileSelectMod)
+    if (pApp->m_bTileSelectMod)
     {
         if (yoffset > 0)
         {
-            if (++pGame->cWorld.nCurTexOffset >= pGame->cWorld.aTexOffsets.size())
-                pGame->cWorld.nCurTexOffset = 0;
+            if (++pApp->cWorld.nCurTexOffset >= pApp->cWorld.aTexOffsets.size())
+                pApp->cWorld.nCurTexOffset = 0;
         }
         else
         {
-            if (--pGame->cWorld.nCurTexOffset < 0)
-                pGame->cWorld.nCurTexOffset = pGame->cWorld.aTexOffsets.size() - 1;
+            if (--pApp->cWorld.nCurTexOffset < 0)
+                pApp->cWorld.nCurTexOffset = pApp->cWorld.aTexOffsets.size() - 1;
         }
     }
     else
     {
         if (yoffset > 0)
-            pGame->cWorld.ZoomAtScreenPos(2.0f, pGame->GetCursorScreenPos());
+            pApp->cWorld.ZoomAtScreenPos(2.0f, pApp->GetCursorScreenPos());
         else
-            pGame->cWorld.ZoomAtScreenPos(0.5f, pGame->GetCursorScreenPos());
+            pApp->cWorld.ZoomAtScreenPos(0.5f, pApp->GetCursorScreenPos());
     }
 }
 
 
 
-void Game::FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
+void App::FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
 {
     glViewport(0, 0, nWidth, nHeight);
 }

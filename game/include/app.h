@@ -24,20 +24,20 @@
 
 
 
-class Game
+class App
 {
     public:
-        Game(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight);
-        ~Game();
+        App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight);
+        ~App();
 
         bool Create();
         void Destroy();
         bool Update();
         void UpdateCursorTile();
-        void RenderGame();
+        void RenderApp();
         void RenderUI();
         void SetDeltaTime();
-        void SetGameState(GameState _eState);
+        void SetAppState(AppState _eState);
         void LoadResources();
         void ConfigEntities();
 
@@ -82,7 +82,7 @@ class Game
         bool m_bShowUIWindow;
         bool m_bShowDebugInfo = true;
 
-        GameState m_eGameState = GameState::PLAY;
+        AppState m_eAppState = AppState::PLAY;
 
         /****************************/
         /*        Map Editor        */
