@@ -2,16 +2,16 @@
 
 
 //Game game((int)(1920 * 1.0), (int)(1080 * 1.0));
-App game((int)(2000 * 1.0), (int)(2000 * 1.0));
+App gameApp((int)(2000 * 1.0), (int)(2000 * 1.0));
 
 
 int main()
 {
-    game.Create();
+    gameApp.Create();
 
-    while(game.Update()) {}
+    while(gameApp.Update()) {}
     
-    game.Destroy();
+    gameApp.Destroy();
 
     return 0;
 }

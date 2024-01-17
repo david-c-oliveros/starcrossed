@@ -9,7 +9,7 @@ class Ship
     public:
         Ship();
         ~Ship();
-        void Update(Event &cEvent);
+        void EventUpdate(Event &cEvent);
 
 
     public:

@@ -5,9 +5,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "engine_defines.h"
 
@@ -20,8 +20,16 @@
 
 #include "global_enums.h"
 #include "world.h"
+#include "ship.h"
 #include "character.h"
 #include "player.h"
+#include "event.h"
+
+#include "ui.h"
+
+
+
+int32_t randInRange(int32_t nMin, int32_t nMax);
 
 
 
@@ -35,10 +43,11 @@ class App
         void Destroy();
         bool Update();
         void UpdateCursorTile();
-        void RenderApp();
 
+        void RenderApp();
         void RenderUI();
-        void RenderInfoOverlay(const char* pStr);
+
+        void EventUpdate();
 
         void SetDeltaTime();
         void SetGameState(GameState _eState);
@@ -70,8 +79,6 @@ class App
         SpriteRenderer cRenderer;
         World cWorld;
 
-        std::unique_ptr<Player> pPlayer;
-
         glm::mat4 projection;
         glm::mat4 view;
 
@@ -81,10 +88,17 @@ class App
     private:
         const char* glsl_version = "#version 330";
 
+        std::unique_ptr<Ship>   m_pShip;
+        std::unique_ptr<Player> m_pPlayer;
+
+        std::vector<Event> m_vecAllEvents;
+
         //std::unique_ptr<ImGuiIO> io;
         ImGuiIO io;
         ImGuiStyle style;
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        UI m_cUI;
 
         bool m_bShowUIWindow;
         bool m_bShowDebugInfo = true;

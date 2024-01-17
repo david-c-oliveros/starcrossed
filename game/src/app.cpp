@@ -49,6 +49,17 @@ bool App::Create()
         m_vecDebugInfo.push_back("");
 
     SetGameState(GameState::PLAY);
+
+    for (int32_t i = 0; i < 10; i++)
+    {
+        Event e;
+        e.mCost["food"] = randInRange(1, 30);
+        m_vecAllEvents.push_back(e);
+    }
+
+    for (auto e : m_vecAllEvents)
+        std::cout << e.mCost["food"] << std::endl;
+
     ConfigEntities();
 
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -155,10 +166,16 @@ bool App::Update()
 
     UpdateCursorTile();
 
-    pPlayer->Update();
+    m_pPlayer->Update();
 
     RenderApp();
     RenderUI();
+
+    if (m_cUI.bNewEvent)
+    {
+        EventUpdate();
+        m_cUI.bNewEvent = false;
+    }
 
     ProcessInput();
 
@@ -206,7 +223,7 @@ void App::RenderApp()
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
     cWorld.Draw(cRenderer);
-    pPlayer->Draw(cRenderer, cWorld);
+    m_pPlayer->Draw(cRenderer, cWorld);
 
     if (m_eGameState == GameState::LEVEL_EDIT)
     {
@@ -233,8 +250,11 @@ void App::RenderUI()
     if (m_bShowUIWindow)
         ImGui::ShowDemoWindow(&m_bShowUIWindow);
 
-    ImGui::ShowAboutWindow();
-    RenderInfoOverlay("");
+    std::string sStr = "Resources\n\nFood: " + std::to_string(m_pShip->nFood) +
+                       "\nScrap: " + std::to_string(m_pShip->nScrap);
+
+    m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
+    m_cUI.RenderControlPanel(glm::ivec2(400, 200));
 
     {
 
@@ -264,8 +284,6 @@ void App::RenderUI()
     {
         ImGui::Begin("Debug");
         
-        ImGui::Checkbox("Toggle player state", &bPlayerIdle);
-
         for (auto &s : m_vecDebugInfo)
             ImGui::Text(s.c_str());
 
@@ -275,7 +293,7 @@ void App::RenderUI()
         for (auto &s : cRenderer.vecDebugInfo)
             ImGui::Text(s.c_str());
 
-        for (auto &s : pPlayer->vecDebugInfo)
+        for (auto &s : m_pPlayer->vecDebugInfo)
             ImGui::Text(s.c_str());
 
         ImGui::End();
@@ -287,26 +305,14 @@ void App::RenderUI()
 
 
 
-void App::RenderInfoOverlay(const char* pStr)
+void App::EventUpdate()
 {
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
+    static int32_t m_nCurEvent = 0;
 
-    static int location = 0;
-    const float fPAD = 10.0f;
-    const ImGuiViewport* pViewport = ImGui::GetMainViewport();
-    ImVec2 vWorkPos = pViewport->WorkPos;
-    ImVec2 vWorkSize = pViewport->WorkSize;
-    ImVec2 vWindowPos, vWindowPosPivot;
-    vWindowPos.x = (location & 1) ? (vWorkPos.x + vWorkSize.x - fPAD) : (vWorkPos.x + fPAD);
-    vWindowPos.y = (location & 1) ? (vWorkPos.y + vWorkSize.y - fPAD) : (vWorkPos.y + fPAD);
-    windowFlags |= ImGuiWindowFlags_NoMove;
-
-    ImGui::SetNextWindowPos(vWindowPos, ImGuiCond_Always, vWindowPosPivot);
-    ImGui::SetNextWindowBgAlpha(0.25f);
-
-    ImGui::Begin("Info panel", &m_bShowInfoPanel, windowFlags);
-    ImGui::Text("Here is some text\n", "Important information here");
-    ImGui::End();
+    if (m_nCurEvent < m_vecAllEvents.size())
+        m_pShip->EventUpdate(m_vecAllEvents[m_nCurEvent++]);
+    else
+        std::cout << "No events remaining" << std::endl;
 }
 
 
@@ -397,40 +403,42 @@ void App::LoadResources()
 
 void App::ConfigEntities()
 {
+    m_pShip = std::make_unique<Ship>();
+
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
     cWorld.LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
-    pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
+    m_pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
 
-    pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
-    pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
-    pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
-    pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
+    m_pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
+    m_pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
+    m_pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
+    m_pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
 
-    pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
-    pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
-    pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
-    pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
+    m_pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
+    m_pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
+    m_pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
+    m_pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
 
     // TPF -> Ticks Per Frame
     uint32_t nTPF = 2;
     uint32_t nNumFrames = 10;
-    pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
 
     nTPF = 8;
     nNumFrames = 7;
-    pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    m_pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
 
-    pPlayer->SetMoveSpeedScalar(0.050f);
-    pPlayer->SetState(CharacterState::IDLE);
-    pPlayer->StartSpriteAnim();
+    m_pPlayer->SetMoveSpeedScalar(0.050f);
+    m_pPlayer->SetState(CharacterState::IDLE);
+    m_pPlayer->StartSpriteAnim();
 }
 
 
@@ -455,23 +463,23 @@ void App::ProcessInput()
     float fMoveScalar = 0.1f;
     if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
     {
-        pPlayer->Move(Direction::FORWARD);
+        m_pPlayer->Move(Direction::FORWARD);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
     {
-        pPlayer->Move(Direction::BACKWARD);
+        m_pPlayer->Move(Direction::BACKWARD);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
     {
-        pPlayer->Move(Direction::LEFT);
+        m_pPlayer->Move(Direction::LEFT);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
     {
-        pPlayer->Move(Direction::RIGHT);
+        m_pPlayer->Move(Direction::RIGHT);
     }
     else
     {
-        pPlayer->SetState(CharacterState::IDLE);
+        m_pPlayer->SetState(CharacterState::IDLE);
     }
 
     if (m_eGameState == GameState::LEVEL_EDIT)
@@ -636,4 +644,13 @@ void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
 void App::FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight)
 {
     glViewport(0, 0, nWidth, nHeight);
+}
+
+
+
+int randInRange(int32_t nMin, int32_t nMax)
+{
+    int32_t nRange = nMax - nMin + 1;
+
+    return rand() % nRange + nMin;
 }

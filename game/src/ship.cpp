@@ -5,7 +5,7 @@
 Ship::Ship()
 {
     nScrap = 0;
-    nFood = 20;
+    nFood = 200;
 }
 
 
@@ -16,7 +16,7 @@ Ship::~Ship()
 
 
 
-void Ship::Update(Event &cEvent)
+void Ship::EventUpdate(Event &cEvent)
 {
     nFood -= cEvent.mCost["food"];
 }
