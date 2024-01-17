@@ -15,6 +15,7 @@ Texture2D::Texture2D()
 
 void Texture2D::Bind() const
 {
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, nID);
 }
 
@@ -25,6 +26,7 @@ void Texture2D::Generate(uint8_t* pData, uint32_t _nWidth, uint32_t _nHeight)
     nWidth = _nWidth;
     nHeight = _nHeight;
 
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, nID);
     glTexImage2D(GL_TEXTURE_2D, 0, nInternal_Format, nWidth, nHeight, 0, nImage_Format, GL_UNSIGNED_BYTE, pData);
 

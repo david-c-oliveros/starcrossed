@@ -1,5 +1,7 @@
 #pragma once
 
+#include "event.h"
+
 
 
 class Ship
@@ -7,7 +9,7 @@ class Ship
     public:
         Ship();
         ~Ship();
-        Update(Event &cEvent);
+        void Update(Event &cEvent);
 
 
     public:

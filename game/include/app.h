@@ -21,6 +21,7 @@
 #include "global_enums.h"
 #include "world.h"
 #include "character.h"
+#include "player.h"
 
 
 
@@ -35,9 +36,12 @@ class App
         bool Update();
         void UpdateCursorTile();
         void RenderApp();
+
         void RenderUI();
+        void RenderInfoOverlay(const char* pStr);
+
         void SetDeltaTime();
-        void SetAppState(AppState _eState);
+        void SetGameState(GameState _eState);
         void LoadResources();
         void ConfigEntities();
 
@@ -66,7 +70,7 @@ class App
         SpriteRenderer cRenderer;
         World cWorld;
 
-        std::unique_ptr<Character> pPlayer;
+        std::unique_ptr<Player> pPlayer;
 
         glm::mat4 projection;
         glm::mat4 view;
@@ -77,12 +81,17 @@ class App
     private:
         const char* glsl_version = "#version 330";
 
+        //std::unique_ptr<ImGuiIO> io;
         ImGuiIO io;
+        ImGuiStyle style;
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
         bool m_bShowUIWindow;
         bool m_bShowDebugInfo = true;
+        bool m_bShowTextLayer = true;
+        bool m_bShowInfoPanel = true;
 
-        AppState m_eAppState = AppState::PLAY;
+        GameState m_eGameState = GameState::PLAY;
 
         /****************************/
         /*        Map Editor        */

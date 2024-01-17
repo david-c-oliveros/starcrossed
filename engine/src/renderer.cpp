@@ -50,3 +50,17 @@ bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight
 
     return true;
 }
+
+
+
+//bool Renderer::Init_GLText()
+//{
+//    if (!gltInit())
+//    {
+//        std::cout << "Failed to initialize glText" << std::endl;
+//        glfwTerminate();
+//        return false;
+//    }
+//
+//    return true;
+//}

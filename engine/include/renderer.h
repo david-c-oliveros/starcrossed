@@ -21,4 +21,5 @@ class Renderer
         static void DrawTri(Shader shader, uint32_t vao);
 
         static bool Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight);
+        static bool Init_GLText();
 };

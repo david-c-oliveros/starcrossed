@@ -48,7 +48,7 @@ bool App::Create()
     for (int i = 0; i < 8; i++)
         m_vecDebugInfo.push_back("");
 
-    SetAppState(AppState::PLAY);
+    SetGameState(GameState::PLAY);
     ConfigEntities();
 
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -87,6 +87,7 @@ bool App::GLInit()
         return false;
     }
 
+
     return true;
 }
 
@@ -121,10 +122,16 @@ void App::UIConfig()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    //ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableApppad;
+
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    ImGui::GetIO().DisplaySize.x = 4000.0f;
+    ImGui::GetIO().DisplaySize.y = 4000.0f;
+
+    ImGui::GetIO().Fonts->AddFontFromFileTTF("../../../external/imgui/misc/fonts/ProggyClean.ttf", 26);
+
+    ImGui::GetStyle().ScaleAllSizes(2.0f);
 
     ImGui::StyleColorsDark();
 
@@ -152,6 +159,7 @@ bool App::Update()
 
     RenderApp();
     RenderUI();
+
     ProcessInput();
 
     glfwSwapBuffers(pWindow);
@@ -200,7 +208,7 @@ void App::RenderApp()
     cWorld.Draw(cRenderer);
     pPlayer->Draw(cRenderer, cWorld);
 
-    if (m_eAppState == AppState::LEVEL_EDIT)
+    if (m_eGameState == GameState::LEVEL_EDIT)
     {
         if (m_bErase)
             cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
@@ -225,6 +233,9 @@ void App::RenderUI()
     if (m_bShowUIWindow)
         ImGui::ShowDemoWindow(&m_bShowUIWindow);
 
+    ImGui::ShowAboutWindow();
+    RenderInfoOverlay("");
+
     {
 
         static float f = 0.0f;
@@ -234,6 +245,7 @@ void App::RenderUI()
 
         ImGui::Text("This is some useful text.");
         ImGui::Checkbox("Demo Window", &m_bShowUIWindow);
+        ImGui::Checkbox("Text Layer", &m_bShowTextLayer);
 
         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
         ImGui::ColorEdit3("clear color", (float*)&m_vUIClearColor);
@@ -244,7 +256,7 @@ void App::RenderUI()
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
     }
 
@@ -275,6 +287,29 @@ void App::RenderUI()
 
 
 
+void App::RenderInfoOverlay(const char* pStr)
+{
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
+
+    static int location = 0;
+    const float fPAD = 10.0f;
+    const ImGuiViewport* pViewport = ImGui::GetMainViewport();
+    ImVec2 vWorkPos = pViewport->WorkPos;
+    ImVec2 vWorkSize = pViewport->WorkSize;
+    ImVec2 vWindowPos, vWindowPosPivot;
+    vWindowPos.x = (location & 1) ? (vWorkPos.x + vWorkSize.x - fPAD) : (vWorkPos.x + fPAD);
+    vWindowPos.y = (location & 1) ? (vWorkPos.y + vWorkSize.y - fPAD) : (vWorkPos.y + fPAD);
+    windowFlags |= ImGuiWindowFlags_NoMove;
+
+    ImGui::SetNextWindowPos(vWindowPos, ImGuiCond_Always, vWindowPosPivot);
+    ImGui::SetNextWindowBgAlpha(0.25f);
+
+    ImGui::Begin("Info panel", &m_bShowInfoPanel, windowFlags);
+    ImGui::Text("Here is some text\n", "Important information here");
+    ImGui::End();
+}
+
+
 
 /**********************************/
 /*                                */
@@ -290,10 +325,10 @@ void App::SetDeltaTime()
 
 
 
-void App::SetAppState(AppState _eState)
+void App::SetGameState(GameState _eState)
 {
-    m_eAppState = _eState;
-    cWorld.SetAppState(_eState);
+    m_eGameState = _eState;
+    cWorld.SetGameState(_eState);
 }
 
 
@@ -366,7 +401,7 @@ void App::ConfigEntities()
     cWorld.LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
-    pPlayer = std::make_unique<Character>(glm::vec2(1.0f, 2.0f));
+    pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
 
     pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
     pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
@@ -439,7 +474,7 @@ void App::ProcessInput()
         pPlayer->SetState(CharacterState::IDLE);
     }
 
-    if (m_eAppState == AppState::LEVEL_EDIT)
+    if (m_eGameState == GameState::LEVEL_EDIT)
     {
         if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         {
@@ -482,7 +517,7 @@ void App::ProcessMouseInput()
         bPanning = false;
     }
 
-    if (m_eAppState == AppState::LEVEL_EDIT)
+    if (m_eGameState == GameState::LEVEL_EDIT)
     {
         if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
             m_bErase = true;
