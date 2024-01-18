@@ -44,9 +44,11 @@ bool App::Create()
 
     LoadResources();
 
-    m_vecDebugInfo = { "App Debug:" };
+    m_vecThisDebugInfo.push_back("App Debug");
     for (int i = 0; i < 8; i++)
-        m_vecDebugInfo.push_back("");
+        m_vecThisDebugInfo.push_back("");
+
+    m_vecAllDebugInfo.push_back(&m_vecThisDebugInfo);
 
     SetGameState(GameState::PLAY);
 
@@ -192,7 +194,7 @@ void App::UpdateCursorTile()
     glm::vec2 vCursorTileFloat = GetCursorWorldPos() / BASE_TILE_SIZE;
     m_vCursorTile.x = vCursorTileFloat.x < 0.0 ? (int32_t)(vCursorTileFloat.x - 1) : (int32_t(vCursorTileFloat.x));
     m_vCursorTile.y = vCursorTileFloat.y < 0.0 ? (int32_t)(vCursorTileFloat.y - 1) : (int32_t(vCursorTileFloat.y));
-    m_vecDebugInfo[1] = "Current cursor tile: " + glm::to_string(m_vCursorTile);
+    m_vecThisDebugInfo[1] = "Current cursor tile: " + glm::to_string(m_vCursorTile);
 }
 
 
@@ -281,23 +283,7 @@ void App::RenderUI()
     }
 
     if (m_bShowDebugInfo)
-    {
-        ImGui::Begin("Debug");
-        
-        for (auto &s : m_vecDebugInfo)
-            ImGui::Text(s.c_str());
-
-        for (auto &s : cWorld.vecDebugInfo)
-            ImGui::Text(s.c_str());
-
-        for (auto &s : cRenderer.vecDebugInfo)
-            ImGui::Text(s.c_str());
-
-        for (auto &s : m_pPlayer->vecDebugInfo)
-            ImGui::Text(s.c_str());
-
-        ImGui::End();
-    }
+        m_cUI.RenderDebugPanel(m_vecAllDebugInfo);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -404,10 +390,13 @@ void App::LoadResources()
 void App::ConfigEntities()
 {
     m_pShip = std::make_unique<Ship>();
+    m_vecAllDebugInfo.push_back(&m_pShip->vecDebugInfo);
 
     cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
     cWorld.LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
+
+    m_vecAllDebugInfo.push_back(&cWorld.vecDebugInfo);
 
     m_pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
 
@@ -439,6 +428,10 @@ void App::ConfigEntities()
     m_pPlayer->SetMoveSpeedScalar(0.050f);
     m_pPlayer->SetState(CharacterState::IDLE);
     m_pPlayer->StartSpriteAnim();
+
+    std::cout << "Original m_vecAllDebugInfo[0] size: " << m_vecAllDebugInfo[0]->size() << std::endl;
+    m_vecAllDebugInfo.push_back(&m_pPlayer->vecDebugInfo);
+    std::cout << "Original m_vecAllDebugInfo[0] size: " << m_vecAllDebugInfo[0]->size() << std::endl;
 }
 
 

@@ -72,3 +72,22 @@ void UI::RenderControlPanel(glm::ivec2 vWindowSize)
 
     ImGui::End();
 }
+
+
+
+void UI::RenderDebugPanel(std::vector<std::vector<std::string>*> vecDebugInfo)
+{
+    ImGui::Begin("Debug");
+
+    for (auto* vec : vecDebugInfo)
+    {
+        ImGui::Text(("\n" + vec->at(0)).c_str());
+        for (int32_t i = 1; i < vec->size(); i++)
+        {
+            if (vec->at(i).length() > 0)
+                ImGui::Text(("--- " + vec->at(i)).c_str());
+        }
+    }
+
+    ImGui::End();
+}

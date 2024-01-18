@@ -84,6 +84,7 @@ class App
 
         bool bPanning = false;
         bool bPlayerIdle = true;
+        int32_t pTmpSize;
 
     private:
         const char* glsl_version = "#version 330";
@@ -118,5 +119,6 @@ class App
         glm::ivec2 m_vCursorTile;
         Sprite cCursorTileSprite;
 
-        std::vector<std::string> m_vecDebugInfo;
+        std::vector<std::string> m_vecThisDebugInfo;
+        std::vector<std::vector<std::string>*> m_vecAllDebugInfo;
 };

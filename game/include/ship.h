@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "event.h"
 
 
@@ -13,6 +15,8 @@ class Ship
 
 
     public:
+        std::vector<std::string> vecDebugInfo;
+
         int32_t nFood;
         int32_t nScrap;
 };
