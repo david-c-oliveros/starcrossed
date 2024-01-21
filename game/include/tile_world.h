@@ -11,48 +11,54 @@
 
 
 
-struct Tile
-{
-    Tile(glm::ivec2 _vWorldPos)
-        : vWorldPos(_vWorldPos) {}
-
-    glm::vec2 vWorldPos;
-    glm::vec2 vTexOffset;
-    bool bEmpty = true;
-};
-
-
-
-struct Room
-{
-    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0))
-        : vUpperLeftPos(_vUpperLeftPos) {}
-
-    glm::ivec2 vDim;
-    glm::ivec2 vUpperLeftPos;
-
-    std::vector<Tile> vecTiles;
-};
+//struct Tile
+//{
+//    Tile(glm::ivec2 _vWorldPos)
+//        : vWorldPos(_vWorldPos) {}
+//
+//    glm::vec2 vWorldPos;
+//    glm::vec2 vTexOffset;
+//    bool bEmpty = true;
+//};
 
 
 
+//struct Room
+//{
+//    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0))
+//        : vUpperLeftPos(_vUpperLeftPos), fOxygenLevel(1.0f) {}
+//
+//    glm::ivec2 vDim;
+//    glm::ivec2 vUpperLeftPos;
+//
+//    float fOxygenLevel;
+//    bool bOpenToVacuum = false;
+//
+//    std::vector<Tile> vecTiles;
+//};
 
-class World
+
+
+
+class TileWorld
 {
     public:
-        World() = default;
+        TileWorld() = default;
 
         bool Create(glm::ivec2 vViewArea, const glm::vec2& vPixelScale = glm::vec2(1.0f));
-        void Draw(SpriteRenderer &cRenderer);
+//        void Draw(SpriteRenderer &cRenderer);
 
-        bool EmptyTile(glm::ivec2 vTilePos);
-        void AddTile(glm::ivec2 vTilePos);
-        void RemoveTile(glm::ivec2 vTilePos);
+//        void UpdateRooms();
 
-        bool SaveToFile(std::string sFilename);
-        void LoadFromFile(const char* cFilename);
+//        bool EmptyTile(glm::ivec2 vTilePos);
+//        void AddTile(glm::ivec2 vTilePos);
+//        void RemoveTile(glm::ivec2 vTilePos);
+
+//        bool SaveToFile(std::string sFilename);
+//        void LoadFromFile(const char* cFilename);
 
         void SetGameState(GameState _eState);
+        GameState GetGameState();
 
         void SetWorldOffset(const glm::vec2& vOffset);
         void MoveWorldOffset(const glm::vec2& vDeltaOffset);
@@ -83,12 +89,12 @@ class World
 
 
     public:
-        std::vector<Room> vecRooms;
+//        std::vector<Room> vecRooms;
 
         std::vector<std::string> vecDebugInfo = std::vector<std::string>(10);
-        std::unique_ptr<Sprite> pSpriteSpaceship;
-
-        std::array<glm::ivec2, 80> aTexOffsets;
+//        std::unique_ptr<Sprite> pSpriteSpaceship;
+//
+//        std::array<glm::ivec2, 80> aTexOffsets;
         int32_t nCurTexOffset = 0;
 
     private:
@@ -103,6 +109,5 @@ class World
         GameState m_eGameState;
 
         // TEMP!!!
-        Sprite cEmptyTileSprite;
-        std::unique_ptr<Sprite> pSprite;
+//        Sprite cEmptyTileSprite;
 };

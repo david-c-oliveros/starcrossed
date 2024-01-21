@@ -19,7 +19,7 @@
 #include "timer.h"
 
 #include "global_enums.h"
-#include "world.h"
+#include "tile_world.h"
 #include "ship.h"
 #include "character.h"
 #include "player.h"
@@ -77,7 +77,7 @@ class App
         GLFWwindow* pWindow;
 
         SpriteRenderer cRenderer;
-        World cWorld;
+        TileWorld cTileWorld;
 
         glm::mat4 projection;
         glm::mat4 view;
@@ -93,11 +93,11 @@ class App
         bool bShowInfoPanel  = true;
         bool bFullscreen = false;
 
+        std::unique_ptr<Player> pPlayer;
+        std::unique_ptr<Ship>   pShip;
+
     private:
         const char* glsl_version = "#version 330";
-
-        std::unique_ptr<Ship>   m_pShip;
-        std::unique_ptr<Player> m_pPlayer;
 
         std::vector<Event> m_vecAllEvents;
 

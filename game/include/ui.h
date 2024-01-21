@@ -16,7 +16,7 @@ class UI
         UI();
         ~UI();
 
-        void RenderOverlayPanel(const char* pStr, glm::ivec2 vWindowSize);
+        void RenderOverlayPanel(std::string sStr, glm::ivec2 vWindowSize);
         void RenderControlPanel(glm::ivec2 vWindowSize);
         void RenderDebugPanel(std::vector<std::vector<std::string>*> vecDebugInfo);
 

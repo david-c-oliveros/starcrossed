@@ -168,7 +168,8 @@ bool App::Update()
 
     UpdateCursorTile();
 
-    m_pPlayer->Update();
+    pPlayer->Update();
+    pShip->UpdateRooms();
 
     RenderApp();
     RenderUI();
@@ -226,15 +227,15 @@ void App::RenderApp()
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
-    cWorld.Draw(cRenderer);
-    m_pPlayer->Draw(cRenderer, cWorld);
+    pShip->Draw(cRenderer, cTileWorld);
+    pPlayer->Draw(cRenderer, cTileWorld);
 
     if (eGameState == GameState::LEVEL_EDIT)
     {
         if (m_bErase)
-            cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
+            cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
         else
-            cWorld.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale(), glm::vec2(0.1f), cWorld.aTexOffsets[cWorld.nCurTexOffset]);
+            pShip->pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), pShip->aTexOffsets[pShip->nCurTexOffset]);
     }
 }
 
@@ -254,12 +255,14 @@ void App::RenderUI()
     if (bShowDemoWindow)
         ImGui::ShowDemoWindow(&bShowDemoWindow);
 
-    std::string sStr = "Resources\n\nFood: " + std::to_string(m_pShip->nFood) +
-                       "\nScrap: " + std::to_string(m_pShip->nScrap);
+    std::string sStr = "Resources\n\nFood: " + std::to_string(pShip->nFood) +
+                       "\nScrap: " + std::to_string(pShip->nScrap) +
+                       "\nOxygen Level: " + std::to_string((int32_t)(pShip->vecRooms[0].fOxygenLevel * 100));
 
     m_vecThisDebugInfo[1] = "Cursor Position: " + glm::to_string(GetCursorScreenPos());
-    m_vecThisDebugInfo[2] = "World Offset: " + glm::to_string(cWorld.GetWorldOffset());
+    m_vecThisDebugInfo[2] = "World Offset: " + glm::to_string(cTileWorld.GetWorldOffset());
     m_vecThisDebugInfo[3] = "Screen Size: " + glm::to_string(Renderer::GetScreenSize());
+
     m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
     m_cUI.RenderControlPanel(glm::ivec2(400, 200));
 
@@ -277,7 +280,7 @@ void App::EventUpdate()
     static int32_t m_nCurEvent = 0;
 
     if (m_nCurEvent < m_vecAllEvents.size())
-        m_pShip->EventUpdate(m_vecAllEvents[m_nCurEvent++]);
+        pShip->ActivateEvent(m_vecAllEvents[m_nCurEvent++]);
     else
         std::cout << "No events remaining" << std::endl;
 }
@@ -301,7 +304,7 @@ void App::SetDeltaTime()
 void App::SetGameState(GameState _eState)
 {
     eGameState = _eState;
-    cWorld.SetGameState(_eState);
+    cTileWorld.SetGameState(_eState);
 }
 
 
@@ -327,7 +330,7 @@ glm::vec2 App::GetCursorScreenPos()
 
 glm::vec2 App::GetCursorWorldPos()
 {
-    return cWorld.ScreenToWorld(GetCursorScreenPos());
+    return cTileWorld.ScreenToWorld(GetCursorScreenPos());
 }
 
 
@@ -370,47 +373,47 @@ void App::LoadResources()
 
 void App::ConfigEntities()
 {
-    m_pShip = std::make_unique<Ship>();
-    m_vecAllDebugInfo.push_back(&m_pShip->vecDebugInfo);
+    pShip = std::make_unique<Ship>();
+    m_vecAllDebugInfo.push_back(&pShip->vecDebugInfo);
 
-    cWorld.Create(glm::ivec2(64, 64), glm::vec2(100.0f));
-    cWorld.LoadFromFile("world_1.txt");
+    cTileWorld.Create(glm::ivec2(64, 64), glm::vec2(100.0f));
+    pShip->LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
-    m_vecAllDebugInfo.push_back(&cWorld.vecDebugInfo);
+    m_vecAllDebugInfo.push_back(&cTileWorld.vecDebugInfo);
 
-    m_pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
+    pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
 
-    m_pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
-    m_pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
-    m_pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
-    m_pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
+    pPlayer->AddAnimatedSprite("rock_walk_backward", "walk_backward");
+    pPlayer->AddAnimatedSprite("rock_walk_forward",  "walk_forward");
+    pPlayer->AddAnimatedSprite("rock_walk_left",     "walk_left");
+    pPlayer->AddAnimatedSprite("rock_walk_right",    "walk_right");
 
-    m_pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
-    m_pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
-    m_pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
-    m_pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
+    pPlayer->AddAnimatedSprite("rock_idle_backward", "idle_backward");
+    pPlayer->AddAnimatedSprite("rock_idle_forward",  "idle_forward");
+    pPlayer->AddAnimatedSprite("rock_idle_left",     "idle_left");
+    pPlayer->AddAnimatedSprite("rock_idle_right",    "idle_right");
 
     // TPF -> Ticks Per Frame
     uint32_t nTPF = 2;
     uint32_t nNumFrames = 10;
-    m_pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("walk_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(0.1f, 1.0f), glm::vec2(0.1f, 1.0f), glm::vec2(1.5f));
 
     nTPF = 8;
     nNumFrames = 7;
-    m_pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
-    m_pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_backward", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_forward",  nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_left",     nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
+    pPlayer->ConfigAnimatedSprite("idle_right",    nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.0f / 7.0f, 1.0f), glm::vec2(1.5f));
 
-    m_pPlayer->SetMoveSpeedScalar(0.050f);
-    m_pPlayer->SetState(CharacterState::IDLE);
-    m_pPlayer->StartSpriteAnim();
+    pPlayer->SetMoveSpeedScalar(0.050f);
+    pPlayer->SetState(CharacterState::IDLE);
+    pPlayer->StartSpriteAnim();
 
-    m_vecAllDebugInfo.push_back(&m_pPlayer->vecDebugInfo);
+    m_vecAllDebugInfo.push_back(&pPlayer->vecDebugInfo);
 }
 
 
@@ -435,23 +438,23 @@ void App::ProcessInput()
     float fMoveScalar = 0.1f;
     if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
     {
-        m_pPlayer->Move(Direction::FORWARD);
+        pPlayer->Move(Direction::FORWARD);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
     {
-        m_pPlayer->Move(Direction::BACKWARD);
+        pPlayer->Move(Direction::BACKWARD);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
     {
-        m_pPlayer->Move(Direction::LEFT);
+        pPlayer->Move(Direction::LEFT);
     }
     else if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
     {
-        m_pPlayer->Move(Direction::RIGHT);
+        pPlayer->Move(Direction::RIGHT);
     }
     else
     {
-        m_pPlayer->SetState(CharacterState::IDLE);
+        pPlayer->SetState(CharacterState::IDLE);
     }
 
     if (eGameState == GameState::LEVEL_EDIT)
@@ -481,19 +484,19 @@ void App::ProcessMouseInput()
     {
         if (bPanning)
         {
-            cWorld.UpdatePan(vPos);
-            m_vCursorMoveDelta += cWorld.ScreenToWorld(vPos);
+            cTileWorld.UpdatePan(vPos);
+            m_vCursorMoveDelta += cTileWorld.ScreenToWorld(vPos);
         }
         else
         {
             m_vCursorMoveDelta = glm::vec2(0.0f);
-            cWorld.StartPan(vPos);
+            cTileWorld.StartPan(vPos);
             bPanning = true;
         }
     }
     else if (bPanning)
     {
-        cWorld.EndPan(vPos);
+        cTileWorld.EndPan(vPos);
         bPanning = false;
     }
 
@@ -504,14 +507,14 @@ void App::ProcessMouseInput()
         else
             m_bErase = false;
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cWorld.EmptyTile(m_vCursorTile))
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && pShip->EmptyTile(m_vCursorTile))
         {
-            cWorld.AddTile(m_vCursorTile);
+            pShip->AddTile(m_vCursorTile);
         }
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cWorld.EmptyTile(m_vCursorTile))
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !pShip->EmptyTile(m_vCursorTile))
         {
-            cWorld.RemoveTile(m_vCursorTile);
+            pShip->RemoveTile(m_vCursorTile);
         }
     }
 }
@@ -566,20 +569,25 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        pApp->cWorld.SetWorldOffset(glm::vec2(0.0f));
-        pApp->cWorld.SetWorldScale((glm::vec2(100.0f)));
+        pApp->cTileWorld.SetWorldOffset(glm::vec2(0.0f));
+        pApp->cTileWorld.SetWorldScale((glm::vec2(100.0f)));
+    }
+
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        pApp->pShip->vecRooms[0].bOpenToVacuum = true;
     }
 
     if (key == GLFW_KEY_E && action == GLFW_PRESS)
     {
-        if (++pApp->cWorld.nCurTexOffset >= pApp->cWorld.aTexOffsets.size())
-            pApp->cWorld.nCurTexOffset = 0;
+        if (++pApp->pShip->nCurTexOffset >= pApp->pShip->aTexOffsets.size())
+            pApp->pShip->nCurTexOffset = 0;
     }
 
     if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     {
-        if (--pApp->cWorld.nCurTexOffset < 0)
-            pApp->cWorld.nCurTexOffset = pApp->cWorld.aTexOffsets.size() - 1;
+        if (--pApp->pShip->nCurTexOffset < 0)
+            pApp->pShip->nCurTexOffset = pApp->pShip->aTexOffsets.size() - 1;
     }
 
     if (key == GLFW_KEY_B && action == GLFW_PRESS)
@@ -591,7 +599,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
         ss << "world_" << pApp->nCurFileNum << ".txt";
         std::string sFilename = ss.str();
         std::cout << "Filename: " << sFilename << std::endl;
-        while (!pApp->cWorld.SaveToFile(sFilename))
+        while (!pApp->pShip->SaveToFile(sFilename))
         {
             pApp->nCurFileNum++;
             std::stringstream ss;
@@ -612,21 +620,21 @@ void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
     {
         if (yoffset > 0)
         {
-            if (++pApp->cWorld.nCurTexOffset >= pApp->cWorld.aTexOffsets.size())
-                pApp->cWorld.nCurTexOffset = 0;
+            if (++pApp->pShip->nCurTexOffset >= pApp->pShip->aTexOffsets.size())
+                pApp->pShip->nCurTexOffset = 0;
         }
         else
         {
-            if (--pApp->cWorld.nCurTexOffset < 0)
-                pApp->cWorld.nCurTexOffset = pApp->cWorld.aTexOffsets.size() - 1;
+            if (--pApp->pShip->nCurTexOffset < 0)
+                pApp->pShip->nCurTexOffset = pApp->pShip->aTexOffsets.size() - 1;
         }
     }
     else
     {
         if (yoffset > 0)
-            pApp->cWorld.ZoomAtScreenPos(2.0f, pApp->GetCursorScreenPos());
+            pApp->cTileWorld.ZoomAtScreenPos(2.0f, pApp->GetCursorScreenPos());
         else
-            pApp->cWorld.ZoomAtScreenPos(0.5f, pApp->GetCursorScreenPos());
+            pApp->cTileWorld.ZoomAtScreenPos(0.5f, pApp->GetCursorScreenPos());
     }
 }
 

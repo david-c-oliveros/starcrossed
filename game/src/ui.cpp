@@ -14,7 +14,7 @@ UI::~UI()
 
 
 
-void UI::RenderOverlayPanel(const char* pStr, glm::ivec2 vWindowSize)
+void UI::RenderOverlayPanel(std::string sStr, glm::ivec2 vWindowSize)
 {
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
 
@@ -38,7 +38,7 @@ void UI::RenderOverlayPanel(const char* pStr, glm::ivec2 vWindowSize)
     ImGui::SetNextWindowBgAlpha(0.25f);
 
     ImGui::Begin("Info Panel", &bShowOverlayPanel, windowFlags);
-    ImGui::Text(pStr);
+    ImGui::Text(sStr.c_str());
     ImGui::End();
 }
 

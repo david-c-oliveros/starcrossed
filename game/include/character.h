@@ -5,7 +5,7 @@
 #include <array>
 
 #include "global_enums.h"
-#include "world.h"
+#include "tile_world.h"
 #include "entity.h"
 #include "animated_sprite.h"
 
@@ -25,7 +25,7 @@ class Character : public Entity
         Character(glm::vec2 _vWorldPos);
         ~Character();
 
-        void Draw(SpriteRenderer &cRenderer, World &cWorld);
+        void Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
         void AddAnimatedSprite(std::string sTexName, std::string sSpriteName);
         void ConfigAnimatedSprite(std::string sSpriteName, uint32_t nNumFrames, uint32_t nTicksPerFrame,
                                   glm::vec2 vStart, glm::vec2 vFrameSize, glm::vec2 vFrameOffset,
