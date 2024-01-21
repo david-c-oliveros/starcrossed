@@ -86,6 +86,13 @@ class App
         bool bPlayerIdle = true;
         int32_t pTmpSize;
 
+        GameState eGameState = GameState::PLAY;
+
+        bool bShowDemoWindow = false;
+        bool bShowDebugPanel = true;
+        bool bShowInfoPanel  = true;
+        bool bFullscreen = false;
+
     private:
         const char* glsl_version = "#version 330";
 
@@ -100,13 +107,6 @@ class App
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
         UI m_cUI;
-
-        bool m_bShowUIWindow;
-        bool m_bShowDebugInfo = true;
-        bool m_bShowTextLayer = true;
-        bool m_bShowInfoPanel = true;
-
-        GameState m_eGameState = GameState::PLAY;
 
         /****************************/
         /*        Map Editor        */

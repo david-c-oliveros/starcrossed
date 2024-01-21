@@ -79,6 +79,8 @@ void UI::RenderDebugPanel(std::vector<std::vector<std::string>*> vecDebugInfo)
 {
     ImGui::Begin("Debug");
 
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
     for (auto* vec : vecDebugInfo)
     {
         ImGui::Text(("\n" + vec->at(0)).c_str());

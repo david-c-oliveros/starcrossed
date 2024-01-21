@@ -20,7 +20,55 @@ void Renderer::Draw(GLuint &vao, Shader shader, GLuint nNumVert)
 
 
 
-bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight)
+void Renderer::EnterFullscreen(GLFWwindow* pWindow)
+{
+    GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* pMode = glfwGetVideoMode(pMonitor);
+
+    glfwSetWindowMonitor(pWindow, glfwGetPrimaryMonitor(), 0, 0, pMode->width, pMode->height, pMode->refreshRate);
+    std::cout << "Monitor width: " << pMode->width << std::endl;
+    std::cout << "Monitor height: " << pMode->height << std::endl;
+}
+
+
+
+void Renderer::ExitFullscreen(GLFWwindow* pWindow, glm::ivec2 vPos, glm::ivec2 vSize)
+{
+    glfwSetWindowMonitor(pWindow, NULL, vPos.x, vPos.y, vSize.x, vSize.y, 0);
+}
+
+
+
+glm::vec2 Renderer::GetScreenSize()
+{
+    GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* pMode = glfwGetVideoMode(pMonitor);
+
+    return glm::vec2(pMode->width, pMode->height);
+}
+
+
+
+glm::vec2 Renderer::GetMonitorContentScale()
+{
+    GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
+
+    float fScaleX, fScaleY;
+    glfwGetMonitorContentScale(pMonitor, &fScaleX, &fScaleY);
+
+    return glm::vec2(fScaleX, fScaleY);
+}
+
+
+
+void Renderer::CloseWindow(GLFWwindow* pWindow)
+{
+    glfwSetWindowShouldClose(pWindow, true);
+}
+
+
+
+bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight, bool bFullscreen)
 {
     std::cout << "Init GLFW\n";
 
@@ -30,7 +78,28 @@ bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // Temporary
 
-    *pWindow = glfwCreateWindow(nWidth, nHeight, "Star Crossed", NULL, NULL);
+    if (bFullscreen)
+    {
+        GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
+
+        int32_t nWidth_mm, nHeight_mm;
+        glfwGetMonitorPhysicalSize(pMonitor, &nWidth_mm, &nHeight_mm);
+
+        float fScaleX, fScaleY;
+        glfwGetMonitorContentScale(pMonitor, &fScaleX, &fScaleY);
+
+        std::cout << "Monitor width: " << nWidth_mm << std::endl;
+        std::cout << "Monitor height: " << nHeight_mm << std::endl;
+
+        std::cout << "Monitor scaleX: " << fScaleX << std::endl;
+        std::cout << "Monitor scaleY: " << fScaleY << std::endl;
+
+        *pWindow = glfwCreateWindow(nWidth * fScaleX, nHeight * fScaleY, "Star Crossed", pMonitor, NULL);
+    }
+    else
+    {
+        *pWindow = glfwCreateWindow(nWidth, nHeight, "Star Crossed", NULL, NULL);
+    }
 
     if (pWindow == NULL)
     {
@@ -50,17 +119,3 @@ bool Renderer::Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight
 
     return true;
 }
-
-
-
-//bool Renderer::Init_GLText()
-//{
-//    if (!gltInit())
-//    {
-//        std::cout << "Failed to initialize glText" << std::endl;
-//        glfwTerminate();
-//        return false;
-//    }
-//
-//    return true;
-//}

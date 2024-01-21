@@ -20,6 +20,13 @@ class Renderer
         static void InitTri();
         static void DrawTri(Shader shader, uint32_t vao);
 
-        static bool Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight);
+        static void EnterFullscreen(GLFWwindow* pWindow);
+        static void ExitFullscreen(GLFWwindow* pWindow, glm::ivec2 vPos, glm::ivec2 vSize);
+        static glm::vec2 GetScreenSize();
+        static glm::vec2 GetMonitorContentScale();
+
+        static void CloseWindow(GLFWwindow* pWindow);
+
+        static bool Init_GLFW(GLFWwindow** pWindow, uint32_t nWidth, uint32_t nHeight, bool bFullscreen);
         static bool Init_GLText();
 };

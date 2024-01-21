@@ -94,7 +94,7 @@ void App::Destroy()
 /************************************/
 bool App::GLInit()
 {
-    if (!Renderer::Init_GLFW(&pWindow, nCanvasWidth, nCanvasHeight))
+    if (!Renderer::Init_GLFW(&pWindow, nCanvasWidth, nCanvasHeight, bFullscreen))
     {
         std::cout << "ERROR::GLFW" << std::endl;
         return false;
@@ -219,7 +219,9 @@ void App::RenderApp()
     float fWidth  = static_cast<float>(nCanvasWidth);
     float fHeight = static_cast<float>(nCanvasHeight);
 
-    projection = glm::ortho<float>(0.0f, fWidth, fHeight, 0.0f, -1000.0f, 1000.0f);
+    glm::vec2 vScreenSize = bFullscreen ? Renderer::GetScreenSize() : glm::vec2(fWidth, fHeight);
+
+    projection = glm::ortho<float>(0.0f, vScreenSize.x, vScreenSize.y, 0.0f, -1000.0f, 1000.0f);
 
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
@@ -227,7 +229,7 @@ void App::RenderApp()
     cWorld.Draw(cRenderer);
     m_pPlayer->Draw(cRenderer, cWorld);
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (eGameState == GameState::LEVEL_EDIT)
     {
         if (m_bErase)
             cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cWorld.GetWorldScale() - cWorld.GetWorldOffset() * cWorld.GetWorldScale(), cWorld.GetWorldScale());
@@ -249,40 +251,19 @@ void App::RenderUI()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    if (m_bShowUIWindow)
-        ImGui::ShowDemoWindow(&m_bShowUIWindow);
+    if (bShowDemoWindow)
+        ImGui::ShowDemoWindow(&bShowDemoWindow);
 
     std::string sStr = "Resources\n\nFood: " + std::to_string(m_pShip->nFood) +
                        "\nScrap: " + std::to_string(m_pShip->nScrap);
 
+    m_vecThisDebugInfo[1] = "Cursor Position: " + glm::to_string(GetCursorScreenPos());
+    m_vecThisDebugInfo[2] = "World Offset: " + glm::to_string(cWorld.GetWorldOffset());
+    m_vecThisDebugInfo[3] = "Screen Size: " + glm::to_string(Renderer::GetScreenSize());
     m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
     m_cUI.RenderControlPanel(glm::ivec2(400, 200));
 
-    {
-
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Begin("Hello, world!");
-
-        ImGui::Text("This is some useful text.");
-        ImGui::Checkbox("Demo Window", &m_bShowUIWindow);
-        ImGui::Checkbox("Text Layer", &m_bShowTextLayer);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-        ImGui::ColorEdit3("clear color", (float*)&m_vUIClearColor);
-
-        if (ImGui::Button("Button"))
-            counter++;
-
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-    }
-
-    if (m_bShowDebugInfo)
+    if (bShowDebugPanel)
         m_cUI.RenderDebugPanel(m_vecAllDebugInfo);
 
     ImGui::Render();
@@ -319,7 +300,7 @@ void App::SetDeltaTime()
 
 void App::SetGameState(GameState _eState)
 {
-    m_eGameState = _eState;
+    eGameState = _eState;
     cWorld.SetGameState(_eState);
 }
 
@@ -392,7 +373,7 @@ void App::ConfigEntities()
     m_pShip = std::make_unique<Ship>();
     m_vecAllDebugInfo.push_back(&m_pShip->vecDebugInfo);
 
-    cWorld.Create(glm::ivec2(32, 32), glm::vec2(100.0f));
+    cWorld.Create(glm::ivec2(64, 64), glm::vec2(100.0f));
     cWorld.LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
@@ -429,9 +410,7 @@ void App::ConfigEntities()
     m_pPlayer->SetState(CharacterState::IDLE);
     m_pPlayer->StartSpriteAnim();
 
-    std::cout << "Original m_vecAllDebugInfo[0] size: " << m_vecAllDebugInfo[0]->size() << std::endl;
     m_vecAllDebugInfo.push_back(&m_pPlayer->vecDebugInfo);
-    std::cout << "Original m_vecAllDebugInfo[0] size: " << m_vecAllDebugInfo[0]->size() << std::endl;
 }
 
 
@@ -475,7 +454,7 @@ void App::ProcessInput()
         m_pPlayer->SetState(CharacterState::IDLE);
     }
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (eGameState == GameState::LEVEL_EDIT)
     {
         if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         {
@@ -518,7 +497,7 @@ void App::ProcessMouseInput()
         bPanning = false;
     }
 
-    if (m_eGameState == GameState::LEVEL_EDIT)
+    if (eGameState == GameState::LEVEL_EDIT)
     {
         if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
             m_bErase = true;
@@ -567,12 +546,28 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(pWindow, true);
+        Renderer::CloseWindow(pWindow);
+    }
+
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+    {
+        if (pApp->bFullscreen)
+        {
+            Renderer::ExitFullscreen(pWindow, glm::ivec2(400), glm::ivec2(pApp->nCanvasWidth, pApp->nCanvasHeight));
+            pApp->bFullscreen = false;
+        }
+        else
+        {
+            Renderer::EnterFullscreen(pWindow);
+
+            pApp->bFullscreen = true;
+        }
     }
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
         pApp->cWorld.SetWorldOffset(glm::vec2(0.0f));
+        pApp->cWorld.SetWorldScale((glm::vec2(100.0f)));
     }
 
     if (key == GLFW_KEY_E && action == GLFW_PRESS)
@@ -587,7 +582,10 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
             pApp->cWorld.nCurTexOffset = pApp->cWorld.aTexOffsets.size() - 1;
     }
 
-    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+    if (key == GLFW_KEY_B && action == GLFW_PRESS)
+        pApp->bShowDebugPanel = !pApp->bShowDebugPanel;
+
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && pApp->eGameState == GameState::LEVEL_EDIT)
     {
         std::stringstream ss;
         ss << "world_" << pApp->nCurFileNum << ".txt";
