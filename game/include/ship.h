@@ -27,15 +27,27 @@ struct Tile
 struct Room
 {
     Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0))
-        : vUpperLeftPos(_vUpperLeftPos), fOxygenLevel(1.0f) {}
+        : vUpperLeftPos(_vUpperLeftPos), fAirPressure(1.0f) {}
 
     glm::ivec2 vDim;
     glm::ivec2 vUpperLeftPos;
 
-    float fOxygenLevel;
+    float fAirPressure;
     bool bOpenToVacuum = false;
 
     std::vector<Tile> vecTiles;
+};
+
+
+
+struct Door
+{
+    Door(std::shared_ptr<Room> r1, std::shared_ptr<Room> r2)
+    {
+        pConnectedRooms = std::make_pair(r1, r2);
+    }
+
+    std::pair<std::shared_ptr<Room>, std::shared_ptr<Room>> pConnectedRooms;
 };
 
 
@@ -56,6 +68,7 @@ class Ship
         void Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
 
         void UpdateRooms();
+        void CalcAirFlow();
         void ActivateEvent(Event &cEvent);
 
 
@@ -72,7 +85,8 @@ class Ship
         int32_t nFood;
         int32_t nScrap;
 
-        std::vector<Room> vecRooms;
+        std::vector<std::shared_ptr<Room>> vecRooms;
+        std::vector<Door> vecDoors;
 
         bool bDoorsOpen = false;
 };

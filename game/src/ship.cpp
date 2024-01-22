@@ -25,9 +25,9 @@ Ship::Ship()
         }
     }
 
-    Room r(glm::ivec2(0));
+     auto r = std::make_shared<Room>(glm::ivec2(0));
 
-    r.vDim = glm::ivec2(64);
+    r->vDim = glm::ivec2(64);
     vecRooms.push_back(r);
 }
 
@@ -43,7 +43,7 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
     for (auto &r : vecRooms)
     {
-        for (auto &t : r.vecTiles)
+        for (auto &t : r->vecTiles)
         {
             glm::vec2 vTileScreenPos = cTileWorld.WorldToScreen(t.vWorldPos);
             glm::vec2 vScalar = cTileWorld.GetWorldScale();
@@ -61,10 +61,20 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 void Ship::UpdateRooms()
 {
     if (bDoorsOpen)
+        CalcAirFlow();
+}
+
+
+
+void Ship::CalcAirFlow()
+{
+    const static float fC = 0.01f;
+    for (auto &d : vecDoors)
     {
-        float fPressureFlow = 0.01f * vecRooms[0].fOxygenLevel - 0.01f * vecRooms[1].fOxygenLevel;
-        vecRooms[0].fOxygenLevel -= fPressureFlow;
-        vecRooms[1].fOxygenLevel += fPressureFlow;
+        float fAirFlow = fC * d.pConnectedRooms.first->fAirPressure - fC * d.pConnectedRooms.second->fAirPressure;
+
+        d.pConnectedRooms.first->fAirPressure  -= fAirFlow;
+        d.pConnectedRooms.second->fAirPressure += fAirFlow;
     }
 }
 
@@ -79,7 +89,7 @@ void Ship::ActivateEvent(Event &cEvent)
 
 bool Ship::EmptyTile(glm::ivec2 vTilePos)
 {
-    return vecRooms[0].vecTiles[vTilePos.y * vecRooms[0].vDim.x + vTilePos.x].bEmpty;
+    return vecRooms[0]->vecTiles[vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x].bEmpty;
 }
 
 
@@ -87,12 +97,12 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
 void Ship::AddTile(glm::ivec2 vTilePos)
 {
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0].vDim.x &&
-        vTilePos.y < vecRooms[0].vDim.y)
+        vTilePos.x < vecRooms[0]->vDim.x &&
+        vTilePos.y < vecRooms[0]->vDim.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0].vDim.x + vTilePos.x;
-        vecRooms[0].vecTiles[nIndex].bEmpty = false;
-        vecRooms[0].vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
+        uint32_t nIndex = vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x;
+        vecRooms[0]->vecTiles[nIndex].bEmpty = false;
+        vecRooms[0]->vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
     }
 }
 
@@ -101,12 +111,12 @@ void Ship::AddTile(glm::ivec2 vTilePos)
 void Ship::RemoveTile(glm::ivec2 vTilePos)
 {
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0].vDim.x &&
-        vTilePos.y < vecRooms[0].vDim.y)
+        vTilePos.x < vecRooms[0]->vDim.x &&
+        vTilePos.y < vecRooms[0]->vDim.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0].vDim.x + vTilePos.x;
-        vecRooms[0].vecTiles[nIndex].bEmpty = true;
-        vecRooms[0].vecTiles[nIndex].vTexOffset = glm::vec2(0);
+        uint32_t nIndex = vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x;
+        vecRooms[0]->vecTiles[nIndex].bEmpty = true;
+        vecRooms[0]->vecTiles[nIndex].vTexOffset = glm::vec2(0);
     }
 }
 
@@ -129,11 +139,11 @@ bool Ship::SaveToFile(std::string sFilename)
         /*        Write room dimensions        */
         /***************************************/
         std::stringstream ssa;
-        ssa << "x" << std::hex << r.vDim.x << "y" << std::hex << r.vDim.y;
+        ssa << "x" << std::hex << r->vDim.x << "y" << std::hex << r->vDim.y;
         ssa << "t";
 
         fOutFile << ssa.str();
-        for (auto &t : r.vecTiles)
+        for (auto &t : r->vecTiles)
         {
             if (t.bEmpty)
             {
@@ -161,10 +171,15 @@ bool Ship::SaveToFile(std::string sFilename)
 void Ship::LoadFromFile(const char* cFilename)
 {
     // TEMP - Currently only loads one room
-    vecRooms.push_back(Room(glm::ivec2(0)));
-    vecRooms.push_back(Room(glm::ivec2(65)));
+    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(0)));
+    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(64)));
+    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(128)));
 
-    vecRooms[1].fOxygenLevel = 0.6f;
+    vecRooms[0]->fAirPressure = 0.6f;
+    vecRooms[1]->fAirPressure = 8.0f;
+
+    vecDoors.push_back(Door(vecRooms[0], vecRooms[1]));
+    vecDoors.push_back(Door(vecRooms[1], vecRooms[2]));
 
     glm::ivec2 vDim(0, 0);
 
@@ -229,7 +244,7 @@ void Ship::LoadFromFile(const char* cFilename)
     std::stringstream ssa;
     ss << vecWorld[0][1] << vecWorld[0][2];
     ssa << std::hex << ss.str();
-    ssa >> vecRooms[0].vDim.x;
+    ssa >> vecRooms[0]->vDim.x;
 
     ss.str("");
     ssa.str("");
@@ -238,7 +253,7 @@ void Ship::LoadFromFile(const char* cFilename)
 
     ss << vecWorld[1][1] << vecWorld[1][2];
     ssa << std::hex << ss.str();
-    ssa >> vecRooms[0].vDim.y;
+    ssa >> vecRooms[0]->vDim.y;
 
     /************************/
     /*    Read tile data    */
@@ -246,14 +261,14 @@ void Ship::LoadFromFile(const char* cFilename)
     int32_t i = 2;
     int32_t nEmptyTiles = 0;
     int32_t nNonEmptyTiles = 0;
-    for (int32_t y = 0; y < vecRooms[0].vDim.y; y++)
+    for (int32_t y = 0; y < vecRooms[0]->vDim.y; y++)
     {
-        for (int32_t x = 0; x < vecRooms[0].vDim.x; x++)
+        for (int32_t x = 0; x < vecRooms[0]->vDim.x; x++)
         {
             if (vecWorld[i] == "#")
             {
                 Tile t(glm::ivec2(x, y));
-                vecRooms[0].vecTiles.push_back(t);
+                vecRooms[0]->vecTiles.push_back(t);
                 i++;
                 nEmptyTiles++;
                 continue;
@@ -280,7 +295,7 @@ void Ship::LoadFromFile(const char* cFilename)
             t.bEmpty = false;
             nNonEmptyTiles++;
 
-            vecRooms[0].vecTiles.push_back(t);
+            vecRooms[0]->vecTiles.push_back(t);
 
             i++;
         }
