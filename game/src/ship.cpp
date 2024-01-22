@@ -60,8 +60,12 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 
 void Ship::UpdateRooms()
 {
-    if (vecRooms[0].bOpenToVacuum)
-        vecRooms[0].fOxygenLevel -= 0.01f * vecRooms[0].fOxygenLevel;
+    if (bDoorsOpen)
+    {
+        float fPressureFlow = 0.01f * vecRooms[0].fOxygenLevel - 0.01f * vecRooms[1].fOxygenLevel;
+        vecRooms[0].fOxygenLevel -= fPressureFlow;
+        vecRooms[1].fOxygenLevel += fPressureFlow;
+    }
 }
 
 
@@ -158,6 +162,9 @@ void Ship::LoadFromFile(const char* cFilename)
 {
     // TEMP - Currently only loads one room
     vecRooms.push_back(Room(glm::ivec2(0)));
+    vecRooms.push_back(Room(glm::ivec2(65)));
+
+    vecRooms[1].fOxygenLevel = 0.6f;
 
     glm::ivec2 vDim(0, 0);
 

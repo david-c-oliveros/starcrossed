@@ -64,3 +64,4 @@ class TileWorld
         glm::ivec2 m_vViewArea;
 
         GameState m_eGameState;
+};

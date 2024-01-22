@@ -257,7 +257,8 @@ void App::RenderUI()
 
     std::string sStr = "Resources\n\nFood: " + std::to_string(pShip->nFood) +
                        "\nScrap: " + std::to_string(pShip->nScrap) +
-                       "\nOxygen Level: " + std::to_string((int32_t)(pShip->vecRooms[0].fOxygenLevel * 100));
+                       "\nRoom 1 Oxygen Level: " + std::to_string((int32_t)(pShip->vecRooms[0].fOxygenLevel * 100)) +
+                       "\nRoom 2 Oxygen Level: " + std::to_string((int32_t)(pShip->vecRooms[1].fOxygenLevel * 100));
 
     m_vecThisDebugInfo[1] = "Cursor Position: " + glm::to_string(GetCursorScreenPos());
     m_vecThisDebugInfo[2] = "World Offset: " + glm::to_string(cTileWorld.GetWorldOffset());
@@ -575,7 +576,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
 
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
-        pApp->pShip->vecRooms[0].bOpenToVacuum = true;
+        pApp->pShip->bDoorsOpen = true;
     }
 
     if (key == GLFW_KEY_E && action == GLFW_PRESS)

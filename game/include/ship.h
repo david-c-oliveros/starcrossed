@@ -73,4 +73,6 @@ class Ship
         int32_t nScrap;
 
         std::vector<Room> vecRooms;
+
+        bool bDoorsOpen = false;
 };
