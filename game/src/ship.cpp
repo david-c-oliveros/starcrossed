@@ -71,6 +71,9 @@ void Ship::CalcAirFlow()
     const static float fC = 0.01f;
     for (auto &d : vecDoors)
     {
+        if (!d.bOpen)
+            continue;
+
         float fAirFlow = fC * d.pConnectedRooms.first->fAirPressure - fC * d.pConnectedRooms.second->fAirPressure;
 
         d.pConnectedRooms.first->fAirPressure  -= fAirFlow;
@@ -180,6 +183,7 @@ void Ship::LoadFromFile(const char* cFilename)
 
     vecDoors.push_back(Door(vecRooms[0], vecRooms[1]));
     vecDoors.push_back(Door(vecRooms[1], vecRooms[2]));
+    vecDoors[0].bOpen = true;
 
     glm::ivec2 vDim(0, 0);
 

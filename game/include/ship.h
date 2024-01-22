@@ -48,6 +48,7 @@ struct Door
     }
 
     std::pair<std::shared_ptr<Room>, std::shared_ptr<Room>> pConnectedRooms;
+    bool bOpen = false;
 };
 
 
