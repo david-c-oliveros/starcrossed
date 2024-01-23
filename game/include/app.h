@@ -118,6 +118,7 @@ class App
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
         glm::ivec2 m_vCursorTile;
         Sprite cCursorTileSprite;
+        std::unique_ptr<Sprite> pBGSprite;
 
         std::vector<std::string> m_vecThisDebugInfo;
         std::vector<std::vector<std::string>*> m_vecAllDebugInfo;

@@ -227,6 +227,8 @@ void App::RenderApp()
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
+    pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
+
     pShip->Draw(cRenderer, cTileWorld);
     pPlayer->Draw(cRenderer, cTileWorld);
 
@@ -364,6 +366,8 @@ void App::LoadResources()
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-7.png", true, "rock_idle_left");
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-8.png", true, "rock_idle_right");
 
+    ResourceManager::LoadTexture("../../res/Space Background.png", true, "bg_space_01");
+
     // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
 
     //pRenderer = std::make_shared<SpriteRenderer>(ResourceManager::GetShader("sprite"));
@@ -381,6 +385,8 @@ void App::ConfigEntities()
     cTileWorld.Create(glm::ivec2(64, 64), glm::vec2(100.0f));
     pShip->LoadFromFile("world_1.txt");
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
+
+    pBGSprite = std::make_unique<Sprite>("bg_space_01");
 
     m_vecAllDebugInfo.push_back(&cTileWorld.vecDebugInfo);
 
