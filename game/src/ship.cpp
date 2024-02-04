@@ -11,6 +11,9 @@ Ship::Ship()
     nScrap = 0;
     nFood = 200;
 
+    /*******************************/
+    /*        Sprite things        */
+    /*******************************/
     pSpriteSpaceship = std::make_unique<Sprite>("spaceship_sheet");
     cEmptyTileSprite.SetColor(glm::vec3(0.15f, 0.22f, 0.5f));
 
@@ -25,16 +28,53 @@ Ship::Ship()
         }
     }
 
-     auto r = std::make_shared<Room>(glm::ivec2(0));
-
-    r->vDim = glm::ivec2(64);
-    vecRooms.push_back(r);
+//     auto r = std::make_shared<Room>(glm::ivec2(0));
+//
+//    r->vSize = glm::ivec2(64);
+//    vecRooms.push_back(r);
 }
 
 
 
 Ship::~Ship()
 {
+}
+
+
+
+bool Ship::Create(GameState _eGameState, const char* sFileName)
+{
+    switch(_eGameState)
+    {
+        case(GameState::LEVEL_EDIT):
+        {
+            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(-4), glm::ivec2(64)));
+
+            break;
+        }
+
+        case(GameState::PLAY):
+        {
+            if (strlen(sFileName) == 0)
+            {
+                std::cout << "ERROR: No filename provided" << std::endl;
+                return false;
+            }
+
+            LoadFromFile(sFileName);
+
+            break;
+        }
+    }
+
+    return true;
+}
+
+
+
+void Ship::SetGameState(GameState _eState)
+{
+    m_eGameState = _eState;
 }
 
 
@@ -53,6 +93,17 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
             else if (cTileWorld.GetGameState() == GameState::LEVEL_EDIT)
                 cEmptyTileSprite.DrawColored(cRenderer, vTileScreenPos, vScalar);
         }
+    }
+}
+
+
+
+// TEMP!!
+void Ship::DrawDoorInteractables(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
+{
+    for (auto &d : vecDoors)
+    {
+        d.pI->Draw(cRenderer, cTileWorld);
     }
 }
 
@@ -92,7 +143,7 @@ void Ship::ActivateEvent(Event &cEvent)
 
 bool Ship::EmptyTile(glm::ivec2 vTilePos)
 {
-    return vecRooms[0]->vecTiles[vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x].bEmpty;
+    return vecRooms[0]->vecTiles[vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x].bEmpty;
 }
 
 
@@ -100,10 +151,10 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
 void Ship::AddTile(glm::ivec2 vTilePos)
 {
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0]->vDim.x &&
-        vTilePos.y < vecRooms[0]->vDim.y)
+        vTilePos.x < vecRooms[0]->vSize.x &&
+        vTilePos.y < vecRooms[0]->vSize.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x;
+        uint32_t nIndex = vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x;
         vecRooms[0]->vecTiles[nIndex].bEmpty = false;
         vecRooms[0]->vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
     }
@@ -114,13 +165,25 @@ void Ship::AddTile(glm::ivec2 vTilePos)
 void Ship::RemoveTile(glm::ivec2 vTilePos)
 {
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0]->vDim.x &&
-        vTilePos.y < vecRooms[0]->vDim.y)
+        vTilePos.x < vecRooms[0]->vSize.x &&
+        vTilePos.y < vecRooms[0]->vSize.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0]->vDim.x + vTilePos.x;
+        uint32_t nIndex = vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x;
         vecRooms[0]->vecTiles[nIndex].bEmpty = true;
         vecRooms[0]->vecTiles[nIndex].vTexOffset = glm::vec2(0);
     }
+}
+
+
+
+/********************************/
+/********************************/
+/*        Edit mode only        */
+/********************************/
+/********************************/
+bool Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
+{
+    vecRooms.push_back(std::make_shared<Room>(vPos, vSize));
 }
 
 
@@ -142,7 +205,7 @@ bool Ship::SaveToFile(std::string sFilename)
         /*        Write room dimensions        */
         /***************************************/
         std::stringstream ssa;
-        ssa << "x" << std::hex << r->vDim.x << "y" << std::hex << r->vDim.y;
+        ssa << "x" << std::hex << r->vSize.x << "y" << std::hex << r->vSize.y;
         ssa << "t";
 
         fOutFile << ssa.str();
@@ -174,18 +237,18 @@ bool Ship::SaveToFile(std::string sFilename)
 void Ship::LoadFromFile(const char* cFilename)
 {
     // TEMP - Currently only loads one room
-    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(0)));
-    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(64)));
-    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(128)));
+//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(0)));
+//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(64)));
+//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(128)));
 
-    vecRooms[0]->fAirPressure = 0.6f;
-    vecRooms[1]->fAirPressure = 8.0f;
+//    vecRooms[0]->fAirPressure = 0.6f;
+//    vecRooms[1]->fAirPressure = 8.0f;
+//
+//    vecDoors.push_back(Door(vecRooms[0], vecRooms[1]));
+//    vecDoors.push_back(Door(vecRooms[1], vecRooms[2]));
+//    vecDoors[0].bOpen = true;
 
-    vecDoors.push_back(Door(vecRooms[0], vecRooms[1]));
-    vecDoors.push_back(Door(vecRooms[1], vecRooms[2]));
-    vecDoors[0].bOpen = true;
-
-    glm::ivec2 vDim(0, 0);
+    glm::ivec2 vSize(0, 0);
 
     std::ifstream fin;
     if (std::filesystem::exists(cFilename))
@@ -199,12 +262,17 @@ void Ship::LoadFromFile(const char* cFilename)
     /**************************************************/
     /*    Read file into an std::vector of strings    */
     /**************************************************/
+    int32_t nLineNumber = 0;
     while(fin >> sLine)
     {
+        std::cout << "reading line " << ++nLineNumber << std::endl;
         std::stringstream ss;
         ss << sLine;
         char c;
 
+        /*************************************/
+        /*    Parse out map data elements    */
+        /*************************************/
         while(ss.get(c))
         {
             uint32_t nElementSize = 0;
@@ -214,7 +282,7 @@ void Ship::LoadFromFile(const char* cFilename)
 
             if (c == '#')
                 nElementSize = 1;
-            else if (c == 'x' || c == 'y')
+            else if (c == 'x' || c == 'y' || c == 'w' || c == 'h')
                 nElementSize = 3;
             else
                 nElementSize = 2;
@@ -233,22 +301,26 @@ void Ship::LoadFromFile(const char* cFilename)
     /****************************************************/
     /*    Generate world from std::vector of strings    */
     /****************************************************/
-    /*    Format is "x--y--t"
-     *    'x' -> Indicates width of room
-     *    'y' -> Indicates height of room
+    /*    Format is "x--y--w--h--t"
+     *    'x' -> Indicates x position of upper left corner of room
+     *    'y' -> Indicates y position of upper left corner of room
+     *    'w' -> Indicates width of room
+     *    'h' -> Indicates height of room
      *    't' -> Indicates that the remaining
      *           char's will be tile data,
      *           until another 'r' is read
      *    '-' -> A single hex digit each
      */
-    /*****************************/
-    /*    Read dimension data    */
-    /*****************************/
+
+    /****************************/
+    /*    Read position data    */
+    /****************************/
+    vecRooms.push_back(std::make_shared<Room>());
     std::stringstream ss;
     std::stringstream ssa;
     ss << vecWorld[0][1] << vecWorld[0][2];
     ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vDim.x;
+    ssa >> vecRooms[0]->vSize.x;
 
     ss.str("");
     ssa.str("");
@@ -257,7 +329,28 @@ void Ship::LoadFromFile(const char* cFilename)
 
     ss << vecWorld[1][1] << vecWorld[1][2];
     ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vDim.y;
+    ssa >> vecRooms[0]->vSize.y;
+
+    /*****************************/
+    /*    Read dimension data    */
+    /*****************************/
+    ss.str("");
+    ssa.str("");
+    ss.clear();
+    ssa.clear();
+
+    ss << vecWorld[2][1] << vecWorld[2][2];
+    ssa << std::hex << ss.str();
+    ssa >> vecRooms[0]->vSize.x;
+
+    ss.str("");
+    ssa.str("");
+    ss.clear();
+    ssa.clear();
+
+    ss << vecWorld[3][1] << vecWorld[3][2];
+    ssa << std::hex << ss.str();
+    ssa >> vecRooms[0]->vSize.y;
 
     /************************/
     /*    Read tile data    */
@@ -265,9 +358,9 @@ void Ship::LoadFromFile(const char* cFilename)
     int32_t i = 2;
     int32_t nEmptyTiles = 0;
     int32_t nNonEmptyTiles = 0;
-    for (int32_t y = 0; y < vecRooms[0]->vDim.y; y++)
+    for (int32_t y = 0; y < vecRooms[0]->vSize.y; y++)
     {
-        for (int32_t x = 0; x < vecRooms[0]->vDim.x; x++)
+        for (int32_t x = 0; x < vecRooms[0]->vSize.x; x++)
         {
             if (vecWorld[i] == "#")
             {

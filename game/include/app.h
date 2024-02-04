@@ -26,6 +26,7 @@
 #include "event.h"
 
 #include "ui.h"
+#include "interactable.h"
 
 
 
@@ -47,12 +48,12 @@ class App
         void RenderApp();
         void RenderUI();
 
-        void EventUpdate();
+        void ActivateEvent();
 
         void SetDeltaTime();
         void SetGameState(GameState _eState);
         void LoadResources();
-        void ConfigEntities();
+        bool ConfigEntities();
 
         void ProcessInput();
         void ProcessMouseInput();
@@ -94,9 +95,11 @@ class App
         bool bFullscreen = false;
 
         std::unique_ptr<Player> pPlayer;
-        std::unique_ptr<Ship>   pShip;
+        Ship cShip;
+        //std::unique_ptr<Ship>   pShip;
 
     private:
+        Interactable cI;
         const char* glsl_version = "#version 330";
 
         std::vector<Event> m_vecAllEvents;

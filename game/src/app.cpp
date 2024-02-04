@@ -44,13 +44,20 @@ bool App::Create()
 
     LoadResources();
 
+    SetGameState(GameState::LEVEL_EDIT);
+
+    if (!ConfigEntities())
+        return false;
+
+
+
     m_vecThisDebugInfo.push_back("App Debug");
     for (int i = 0; i < 8; i++)
         m_vecThisDebugInfo.push_back("");
 
     m_vecAllDebugInfo.push_back(&m_vecThisDebugInfo);
 
-    SetGameState(GameState::PLAY);
+
 
     for (int32_t i = 0; i < 10; i++)
     {
@@ -62,7 +69,7 @@ bool App::Create()
     for (auto e : m_vecAllEvents)
         std::cout << e.mCost["food"] << std::endl;
 
-    ConfigEntities();
+
 
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 vOrigin = glm::vec3(0.0f);
@@ -169,16 +176,18 @@ bool App::Update()
     UpdateCursorTile();
 
     pPlayer->Update();
-    pShip->UpdateRooms();
+    cShip.UpdateRooms();
 
     RenderApp();
     RenderUI();
 
     if (m_cUI.bNewEvent)
     {
-        EventUpdate();
+        ActivateEvent();
         m_cUI.bNewEvent = false;
     }
+
+    cI.IsHovered(cTileWorld, GetCursorScreenPos());
 
     ProcessInput();
 
@@ -227,17 +236,24 @@ void App::RenderApp()
     ResourceManager::GetShader("sprite").SetMat4("view", view);
     ResourceManager::GetShader("sprite").SetMat4("projection", projection);
 
-    pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
+//    pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
 
-    pShip->Draw(cRenderer, cTileWorld);
+    cShip.Draw(cRenderer, cTileWorld);
+    cShip.DrawDoorInteractables(cRenderer, cTileWorld);
     pPlayer->Draw(cRenderer, cTileWorld);
+
+    if (cI.IsHovered(cTileWorld, GetCursorScreenPos()))
+        cI.Draw(cRenderer, cTileWorld);
+
+//    for (auto &d : cShip.vecDoors)
+//        d.cI.Draw(cRenderer, cTileWorld);
 
     if (eGameState == GameState::LEVEL_EDIT)
     {
         if (m_bErase)
             cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
         else
-            pShip->pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), pShip->aTexOffsets[pShip->nCurTexOffset]);
+            cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
     }
 }
 
@@ -257,18 +273,25 @@ void App::RenderUI()
     if (bShowDemoWindow)
         ImGui::ShowDemoWindow(&bShowDemoWindow);
 
-    std::string sStr = "Resources\n\nFood: " + std::to_string(pShip->nFood) +
-                       "\nScrap: " + std::to_string(pShip->nScrap) +
-                       "\nRoom 1 Air Pressure: " + std::to_string((int32_t)(pShip->vecRooms[0]->fAirPressure * 100)) +
-                       "\nRoom 2 Air Pressure: " + std::to_string((int32_t)(pShip->vecRooms[1]->fAirPressure * 100)) +
-                       "\nRoom 3 Air Pressure: " + std::to_string((int32_t)(pShip->vecRooms[2]->fAirPressure * 100));
+    switch(eGameState)
+    {
+        case(GameState::LEVEL_EDIT):
+        {
+            std::string sStr = "Resources\n\nFood: " + std::to_string(cShip.nFood) +
+                               "\nScrap: " + std::to_string(cShip.nScrap);// +
+//                               "\nRoom 1 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[0]->fAirPressure * 100)) +
+//                               "\nRoom 2 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[1]->fAirPressure * 100)) +
+//                               "\nRoom 3 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[2]->fAirPressure * 100));
 
-    m_vecThisDebugInfo[1] = "Cursor Position: " + glm::to_string(GetCursorScreenPos());
-    m_vecThisDebugInfo[2] = "World Offset: " + glm::to_string(cTileWorld.GetWorldOffset());
-    m_vecThisDebugInfo[3] = "Screen Size: " + glm::to_string(Renderer::GetScreenSize());
+            m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
+            m_cUI.RenderControlPanel(glm::ivec2(400, 200));
+        }
+    }
 
-    m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
-    m_cUI.RenderControlPanel(glm::ivec2(400, 200));
+    m_vecThisDebugInfo[1] = "Cursor Screen Position: " + glm::to_string(GetCursorScreenPos());
+    m_vecThisDebugInfo[2] = "Cursor World Position: " + glm::to_string(cTileWorld.ScreenToWorld(GetCursorScreenPos()));
+    m_vecThisDebugInfo[3] = "World Offset: " + glm::to_string(cTileWorld.GetWorldOffset());
+    m_vecThisDebugInfo[4] = "Screen Size: " + glm::to_string(Renderer::GetScreenSize());
 
     if (bShowDebugPanel)
         m_cUI.RenderDebugPanel(m_vecAllDebugInfo);
@@ -279,12 +302,12 @@ void App::RenderUI()
 
 
 
-void App::EventUpdate()
+void App::ActivateEvent()
 {
     static int32_t m_nCurEvent = 0;
 
     if (m_nCurEvent < m_vecAllEvents.size())
-        pShip->ActivateEvent(m_vecAllEvents[m_nCurEvent++]);
+        cShip.ActivateEvent(m_vecAllEvents[m_nCurEvent++]);
     else
         std::cout << "No events remaining" << std::endl;
 }
@@ -308,6 +331,7 @@ void App::SetDeltaTime()
 void App::SetGameState(GameState _eState)
 {
     eGameState = _eState;
+    cShip.SetGameState(_eState);
     cTileWorld.SetGameState(_eState);
 }
 
@@ -377,13 +401,19 @@ void App::LoadResources()
 
 
 
-void App::ConfigEntities()
+bool App::ConfigEntities()
 {
-    pShip = std::make_unique<Ship>();
-    m_vecAllDebugInfo.push_back(&pShip->vecDebugInfo);
-
     cTileWorld.Create(glm::ivec2(64, 64), glm::vec2(100.0f));
-    pShip->LoadFromFile("world_1.txt");
+
+    m_vecAllDebugInfo.push_back(&cI.vecDebugInfo);
+    cI.vPos = glm::vec2(4.0f);
+
+    if (!cShip.Create(eGameState))
+        return false;
+
+    //cShip = std::make_unique<Ship>();
+    m_vecAllDebugInfo.push_back(&cShip.vecDebugInfo);
+
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
 
     pBGSprite = std::make_unique<Sprite>("bg_space_01");
@@ -422,6 +452,8 @@ void App::ConfigEntities()
     pPlayer->StartSpriteAnim();
 
     m_vecAllDebugInfo.push_back(&pPlayer->vecDebugInfo);
+
+    return true;
 }
 
 
@@ -515,14 +547,14 @@ void App::ProcessMouseInput()
         else
             m_bErase = false;
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && pShip->EmptyTile(m_vCursorTile))
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cShip.EmptyTile(m_vCursorTile))
         {
-            pShip->AddTile(m_vCursorTile);
+            cShip.AddTile(m_vCursorTile);
         }
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !pShip->EmptyTile(m_vCursorTile))
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cShip.EmptyTile(m_vCursorTile))
         {
-            pShip->RemoveTile(m_vCursorTile);
+            cShip.RemoveTile(m_vCursorTile);
         }
     }
 }
@@ -583,19 +615,19 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
 
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
-        pApp->pShip->bDoorsOpen = true;
+        pApp->cShip.bDoorsOpen = true;
     }
 
     if (key == GLFW_KEY_E && action == GLFW_PRESS)
     {
-        if (++pApp->pShip->nCurTexOffset >= pApp->pShip->aTexOffsets.size())
-            pApp->pShip->nCurTexOffset = 0;
+        if (++pApp->cShip.nCurTexOffset >= pApp->cShip.aTexOffsets.size())
+            pApp->cShip.nCurTexOffset = 0;
     }
 
     if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     {
-        if (--pApp->pShip->nCurTexOffset < 0)
-            pApp->pShip->nCurTexOffset = pApp->pShip->aTexOffsets.size() - 1;
+        if (--pApp->cShip.nCurTexOffset < 0)
+            pApp->cShip.nCurTexOffset = pApp->cShip.aTexOffsets.size() - 1;
     }
 
     if (key == GLFW_KEY_B && action == GLFW_PRESS)
@@ -607,7 +639,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
         ss << "world_" << pApp->nCurFileNum << ".txt";
         std::string sFilename = ss.str();
         std::cout << "Filename: " << sFilename << std::endl;
-        while (!pApp->pShip->SaveToFile(sFilename))
+        while (!pApp->cShip.SaveToFile(sFilename))
         {
             pApp->nCurFileNum++;
             std::stringstream ss;
@@ -628,13 +660,13 @@ void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
     {
         if (yoffset > 0)
         {
-            if (++pApp->pShip->nCurTexOffset >= pApp->pShip->aTexOffsets.size())
-                pApp->pShip->nCurTexOffset = 0;
+            if (++pApp->cShip.nCurTexOffset >= pApp->cShip.aTexOffsets.size())
+                pApp->cShip.nCurTexOffset = 0;
         }
         else
         {
-            if (--pApp->pShip->nCurTexOffset < 0)
-                pApp->pShip->nCurTexOffset = pApp->pShip->aTexOffsets.size() - 1;
+            if (--pApp->cShip.nCurTexOffset < 0)
+                pApp->cShip.nCurTexOffset = pApp->cShip.aTexOffsets.size() - 1;
         }
     }
     else

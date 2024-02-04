@@ -6,9 +6,12 @@
 
 #include <glm/glm.hpp>
 
+#include "global_enums.h"
+#include "game_defines.h"
 #include "sprite.h"
 #include "tile_world.h"
 #include "event.h"
+#include "interactable.h"
 
 
 
@@ -26,10 +29,10 @@ struct Tile
 
 struct Room
 {
-    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0))
-        : vUpperLeftPos(_vUpperLeftPos), fAirPressure(1.0f) {}
+    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0), glm::ivec2 _vSize = glm::ivec2(4))
+        : vUpperLeftPos(_vUpperLeftPos), vSize(_vSize), fAirPressure(1.0f) {}
 
-    glm::ivec2 vDim;
+    glm::ivec2 vSize;
     glm::ivec2 vUpperLeftPos;
 
     float fAirPressure;
@@ -45,10 +48,24 @@ struct Door
     Door(std::shared_ptr<Room> r1, std::shared_ptr<Room> r2)
     {
         pConnectedRooms = std::make_pair(r1, r2);
+        SetDoorPos();
     }
 
     std::pair<std::shared_ptr<Room>, std::shared_ptr<Room>> pConnectedRooms;
+    std::unique_ptr<Interactable> pI;
     bool bOpen = false;
+    glm::vec2 vPos;
+
+    void SetDoorPos()
+    {
+        std::cout << "Room dimensions: " << glm::to_string(pConnectedRooms.first->vSize) << std::endl;
+        vPos.x = pConnectedRooms.first->vUpperLeftPos.x + pConnectedRooms.first->vSize.x;
+        vPos.y = pConnectedRooms.first->vUpperLeftPos.x + pConnectedRooms.first->vSize.y / 2.0f;
+        glm::vec2 vSize = glm::vec2(0.2f, 2.0f);
+        pI = std::make_unique<Interactable>(vPos, vSize);
+
+        std::cout << "Door position: " << glm::to_string(vPos) << std::endl;
+    }
 };
 
 
@@ -59,14 +76,19 @@ class Ship
         Ship();
         ~Ship();
 
+        bool Create(GameState _eGameState, const char* sFileName = "");
+        void SetGameState(GameState _eGameState);
+
         bool EmptyTile(glm::ivec2 vTilePos);
         void AddTile(glm::ivec2 vTilePos);
         void RemoveTile(glm::ivec2 vTilePos);
 
+        bool AddRoom(glm::ivec2 vPos, glm::ivec2 vSize);
         bool SaveToFile(std::string sFilename);
         void LoadFromFile(const char* cFilename);
 
         void Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
+        void DrawDoorInteractables(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
 
         void UpdateRooms();
         void CalcAirFlow();
@@ -90,4 +112,8 @@ class Ship
         std::vector<Door> vecDoors;
 
         bool bDoorsOpen = false;
+
+
+    private:
+        GameState m_eGameState;
 };

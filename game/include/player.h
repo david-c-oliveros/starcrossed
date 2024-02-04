@@ -13,5 +13,4 @@ class Player : public Character
 
 
     public:
-        std::vector<std::string> vecDebugInfo;
 };

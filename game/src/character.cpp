@@ -24,7 +24,7 @@ Character::~Character()
 
 void Character::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
-    vecDebugInfo[2] = "Current sprite name: " + m_sCurSpriteName;
+    vecDebugInfo[2] = "vWorldPos: " + glm::to_string(vWorldPos);
     glm::vec2 vAbsolutePos(vWorldPos * BASE_TILE_SIZE);
     glm::vec2 vScreenPos = cTileWorld.WorldToScreen(vAbsolutePos);
     mSprites.find(m_sCurSpriteName)->second.Draw(cRenderer, vScreenPos, cTileWorld.GetWorldScale());
