@@ -1,0 +1,37 @@
+#pragma once
+
+#include <vector>
+
+#include <glm/glm.hpp>
+
+
+
+
+struct Tile
+{
+    Tile(glm::ivec2 _vWorldPos)
+        : vWorldPos(_vWorldPos) {}
+
+    glm::vec2 vWorldPos;
+    glm::vec2 vTexOffset;
+    bool bEmpty = true;
+};
+
+
+
+class Room
+{
+    public:
+        Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0), glm::ivec2 _vSize = glm::ivec2(4));
+        ~Room();
+
+
+    public:
+        glm::ivec2 vSize;
+        glm::ivec2 vUpperLeftPos;
+
+        float fAirPressure;
+        bool bOpenToVacuum = false;
+
+        std::vector<Tile> vecTiles;
+};

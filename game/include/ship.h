@@ -12,34 +12,7 @@
 #include "tile_world.h"
 #include "event.h"
 #include "interactable.h"
-
-
-
-struct Tile
-{
-    Tile(glm::ivec2 _vWorldPos)
-        : vWorldPos(_vWorldPos) {}
-
-    glm::vec2 vWorldPos;
-    glm::vec2 vTexOffset;
-    bool bEmpty = true;
-};
-
-
-
-struct Room
-{
-    Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0), glm::ivec2 _vSize = glm::ivec2(4))
-        : vUpperLeftPos(_vUpperLeftPos), vSize(_vSize), fAirPressure(1.0f) {}
-
-    glm::ivec2 vSize;
-    glm::ivec2 vUpperLeftPos;
-
-    float fAirPressure;
-    bool bOpenToVacuum = false;
-
-    std::vector<Tile> vecTiles;
-};
+#include "room.h"
 
 
 

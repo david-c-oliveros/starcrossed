@@ -273,16 +273,22 @@ void App::RenderUI()
     if (bShowDemoWindow)
         ImGui::ShowDemoWindow(&bShowDemoWindow);
 
-    switch(eGameState)
-    {
-        case(GameState::LEVEL_EDIT):
-        {
-            std::string sStr = "Resources\n\nFood: " + std::to_string(cShip.nFood) +
-                               "\nScrap: " + std::to_string(cShip.nScrap);// +
+    std::string sStr = "Resources\n\nFood: " + std::to_string(cShip.nFood) +
+                                "\nScrap: " + std::to_string(cShip.nScrap);// +
 //                               "\nRoom 1 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[0]->fAirPressure * 100)) +
 //                               "\nRoom 2 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[1]->fAirPressure * 100)) +
 //                               "\nRoom 3 Air Pressure: " + std::to_string((int32_t)(cShip.vecRooms[2]->fAirPressure * 100));
 
+    switch(eGameState)
+    {
+        case(GameState::LEVEL_EDIT):
+        {
+
+            break;
+        }
+
+        case(GameState::PLAY):
+        {
             m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
             m_cUI.RenderControlPanel(glm::ivec2(400, 200));
         }
@@ -408,8 +414,22 @@ bool App::ConfigEntities()
     m_vecAllDebugInfo.push_back(&cI.vecDebugInfo);
     cI.vPos = glm::vec2(4.0f);
 
-    if (!cShip.Create(eGameState))
-        return false;
+    switch(eGameState)
+    {
+        case(GameState::LEVEL_EDIT):
+        {
+            if (!cShip.Create(eGameState))
+                return false;
+            break;
+        }
+
+        case(GameState::PLAY):
+        {
+            if (!cShip.Create(eGameState, "world_1.txt"))
+                return false;
+            break;
+        }
+    }
 
     //cShip = std::make_unique<Ship>();
     m_vecAllDebugInfo.push_back(&cShip.vecDebugInfo);
