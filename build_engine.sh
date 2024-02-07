@@ -29,6 +29,7 @@ includeFlags="
 -Iexternal/imgui/
 -Iexternal/imgui/backends/
 -Iexternal/glText/
+-Iexternal/stb/
 "
 
 linkerFlags="

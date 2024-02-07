@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-#include "stb_image.h"
+#include <stb_image.h>
 
 #include "texture.h"
 #include "shader.h"
