@@ -141,9 +141,42 @@ void Ship::ActivateEvent(Event &cEvent)
 
 
 
+std::shared_ptr<Room> Ship::GetCurrentRoom(glm::ivec2 vTilePos)
+{
+    for (auto room : vecRooms)
+    {
+        glm::ivec2 vUL = room->vUpperLeftPos;
+
+        if (vTilePos.x >= vUL.x && vTilePos.y >= vUL.y &&
+            vTilePos.x < vUL.x + room->vSize.x &&
+            vTilePos.y < vUL.y + room->vSize.y)
+        {
+            return room;
+        }
+    }
+
+    return nullptr;
+}
+
+
+
 bool Ship::EmptyTile(glm::ivec2 vTilePos)
 {
-    return vecRooms[0]->vecTiles[vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x].bEmpty;
+    std::shared_ptr<Room> pCurRoom = GetCurrentRoom(vTilePos);
+
+    if (pCurRoom == nullptr)
+        return false;
+
+    glm::ivec2 vUL = pCurRoom->vUpperLeftPos;
+
+    if (vTilePos.x < vUL.x || vTilePos.y < vUL.y ||
+        vTilePos.x >= vUL.x + pCurRoom->vSize.x ||
+        vTilePos.y >= vUL.y + pCurRoom->vSize.y)
+        return false;
+
+    uint32_t nIndex = (vTilePos.y - vUL.y) * pCurRoom->vSize.x + (vTilePos.x - vUL.x);
+
+    return pCurRoom->vecTiles[nIndex].bEmpty;
 }
 
 
@@ -155,13 +188,17 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
 /********************************/
 void Ship::AddTile(glm::ivec2 vTilePos)
 {
-    if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0]->vSize.x &&
-        vTilePos.y < vecRooms[0]->vSize.y)
+    std::shared_ptr<Room> pCurRoom = GetCurrentRoom(vTilePos);
+    glm::ivec2 vUL = pCurRoom->vUpperLeftPos;
+
+    if (vTilePos.x >= vUL.x && vTilePos.y >= vUL.y &&
+        vTilePos.x < vUL.x + pCurRoom->vSize.x &&
+        vTilePos.y < vUL.y + pCurRoom->vSize.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x;
-        vecRooms[0]->vecTiles[nIndex].bEmpty = false;
-        vecRooms[0]->vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
+        uint32_t nIndex = (vTilePos.y - vUL.y) * pCurRoom->vSize.x + (vTilePos.x - vUL.x);
+
+        pCurRoom->vecTiles[nIndex].bEmpty = false;
+        pCurRoom->vecTiles[nIndex].vTexOffset = aTexOffsets[nCurTexOffset];
     }
 }
 
@@ -169,13 +206,16 @@ void Ship::AddTile(glm::ivec2 vTilePos)
 
 void Ship::RemoveTile(glm::ivec2 vTilePos)
 {
-    if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
-        vTilePos.x < vecRooms[0]->vSize.x &&
-        vTilePos.y < vecRooms[0]->vSize.y)
+    std::shared_ptr<Room> pCurRoom = GetCurrentRoom(vTilePos);
+    glm::ivec2 vUL = pCurRoom->vUpperLeftPos;
+
+    if (vTilePos.x >= vUL.x && vTilePos.y >= vUL.y &&
+        vTilePos.x < vUL.x + pCurRoom->vSize.x &&
+        vTilePos.y < vUL.y + pCurRoom->vSize.y)
     {
-        uint32_t nIndex = vTilePos.y * vecRooms[0]->vSize.x + vTilePos.x;
-        vecRooms[0]->vecTiles[nIndex].bEmpty = true;
-        vecRooms[0]->vecTiles[nIndex].vTexOffset = glm::vec2(0);
+        uint32_t nIndex = (vTilePos.y - vUL.y) * pCurRoom->vSize.x + (vTilePos.x - vUL.x);
+        pCurRoom->vecTiles[nIndex].bEmpty = true;
+        pCurRoom->vecTiles[nIndex].vTexOffset = glm::vec2(0);
     }
 }
 

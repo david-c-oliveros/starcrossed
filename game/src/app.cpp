@@ -283,7 +283,6 @@ void App::RenderUI()
     {
         case(GameState::LEVEL_EDIT):
         {
-
             break;
         }
 
@@ -291,6 +290,8 @@ void App::RenderUI()
         {
             m_cUI.RenderOverlayPanel(sStr.c_str(), glm::ivec2(400, 200));
             m_cUI.RenderControlPanel(glm::ivec2(400, 200));
+
+            break;
         }
     }
 

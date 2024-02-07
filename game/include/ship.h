@@ -52,6 +52,7 @@ class Ship
         bool Create(GameState _eGameState, const char* sFileName = "");
         void SetGameState(GameState _eGameState);
 
+        std::shared_ptr<Room> GetCurrentRoom(glm::ivec2 vTilePos);
         bool EmptyTile(glm::ivec2 vTilePos);
         void AddTile(glm::ivec2 vTilePos);
         void RemoveTile(glm::ivec2 vTilePos);
