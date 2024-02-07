@@ -653,7 +653,22 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     if (key == GLFW_KEY_B && action == GLFW_PRESS)
         pApp->bShowDebugPanel = !pApp->bShowDebugPanel;
 
-    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && pApp->eGameState == GameState::LEVEL_EDIT)
+    /********************************************/
+    /*                                          */
+    /*        L:Level Edit mode specific        */
+    /*                                          */
+    /********************************************/
+    if (pApp->eGameState != GameState::LEVEL_EDIT)
+        return;
+
+    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+    {
+        std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
+        glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
+        pApp->cShip.AddRoom(vNextPos, glm::ivec2(8));
+    }
+
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
         std::stringstream ss;
         ss << "world_" << pApp->nCurFileNum << ".txt";

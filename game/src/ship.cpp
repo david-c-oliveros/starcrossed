@@ -48,7 +48,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(-4), glm::ivec2(64)));
+            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(8)));
 
             break;
         }
@@ -148,6 +148,11 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
 
 
 
+/********************************/
+/********************************/
+/*        Edit mode only        */
+/********************************/
+/********************************/
 void Ship::AddTile(glm::ivec2 vTilePos)
 {
     if (vTilePos.x >= 0 && vTilePos.y >= 0 &&
@@ -176,14 +181,11 @@ void Ship::RemoveTile(glm::ivec2 vTilePos)
 
 
 
-/********************************/
-/********************************/
-/*        Edit mode only        */
-/********************************/
-/********************************/
 bool Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
 {
     vecRooms.push_back(std::make_shared<Room>(vPos, vSize));
+
+    return true;
 }
 
 
