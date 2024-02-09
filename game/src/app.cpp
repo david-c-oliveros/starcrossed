@@ -44,7 +44,7 @@ bool App::Create()
 
     LoadResources();
 
-    SetGameState(GameState::LEVEL_EDIT);
+    SetGameState(GameState::PLAY);
 
     if (!ConfigEntities())
         return false;
@@ -426,7 +426,7 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_1.txt"))
+            if (!cShip.Create(eGameState, "world_9.txt"))
                 return false;
             break;
         }
@@ -666,7 +666,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     {
         std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
         glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
-        pApp->cShip.AddRoom(vNextPos, glm::ivec2(8));
+        pApp->cShip.AddRoom(vNextPos, glm::ivec2(16));
     }
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)

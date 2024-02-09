@@ -27,11 +27,6 @@ Ship::Ship()
             aTexOffsets[y * nSheetWidth + x] = glm::ivec2(x, y);
         }
     }
-
-//     auto r = std::make_shared<Room>(glm::ivec2(0));
-//
-//    r->vSize = glm::ivec2(64);
-//    vecRooms.push_back(r);
 }
 
 
@@ -48,7 +43,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(8)));
+            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(16)));
 
             break;
         }
@@ -247,7 +242,9 @@ bool Ship::SaveToFile(std::string sFilename)
         /*        Write room dimensions        */
         /***************************************/
         std::stringstream ssa;
-        ssa << "x" << std::hex << r->vSize.x << "y" << std::hex << r->vSize.y;
+        ssa << "x" << std::hex << std::setfill('0') << std::setw(2) << r->vUpperLeftPos.x << "y" << std::hex << std::setfill('0') << std::setw(2) << r->vUpperLeftPos.y <<
+               "w" << std::hex << std::setfill('0') << std::setw(2) << r->vSize.x << "h"         << std::hex << std::setfill('0') << std::setw(2) << r->vSize.y;
+
         ssa << "t";
 
         fOutFile << ssa.str();
@@ -267,9 +264,11 @@ bool Ship::SaveToFile(std::string sFilename)
             ss << std::hex << t.vTexOffset.y;
             fOutFile << ss.str();
         }
+
+        fOutFile << '\n';
     }
 
-    fOutFile.close();
+//    fOutFile.close();
 
     return true;
 }
