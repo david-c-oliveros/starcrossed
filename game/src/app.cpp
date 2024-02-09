@@ -239,11 +239,11 @@ void App::RenderApp()
 //    pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
 
     cShip.Draw(cRenderer, cTileWorld);
-    cShip.DrawDoorInteractables(cRenderer, cTileWorld);
+//    cShip.DrawDoorInteractables(cRenderer, cTileWorld);
     pPlayer->Draw(cRenderer, cTileWorld);
 
-    if (cI.IsHovered(cTileWorld, GetCursorScreenPos()))
-        cI.Draw(cRenderer, cTileWorld);
+//    if (cI.IsHovered(cTileWorld, GetCursorScreenPos()))
+//        cI.Draw(cRenderer, cTileWorld);
 
 //    for (auto &d : cShip.vecDoors)
 //        d.cI.Draw(cRenderer, cTileWorld);
@@ -426,7 +426,7 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_9.txt"))
+            if (!cShip.Create(eGameState, "world_12.txt"))
                 return false;
             break;
         }
@@ -666,7 +666,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     {
         std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
         glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
-        pApp->cShip.AddRoom(vNextPos, glm::ivec2(16));
+        pApp->cShip.AddRoom(vNextPos, glm::ivec2(8));
     }
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)

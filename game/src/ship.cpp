@@ -43,7 +43,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(16)));
+            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(8)));
 
             break;
         }
@@ -76,10 +76,19 @@ void Ship::SetGameState(GameState _eState)
 
 void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
+    if (m_bDebug)
+        std::cout << "Num Rooms: " << vecRooms.size() << std::endl;
     for (auto &r : vecRooms)
     {
+        if (m_bDebug)
+            std::cout << "Num Tiles: " << r->vecTiles.size() << std::endl;
         for (auto &t : r->vecTiles)
         {
+//            if (m_bDebug)
+//            {
+//                std::cout << "Tex offset: " << glm::to_string(t.vTexOffset) << std::endl;
+//            }
+
             glm::vec2 vTileScreenPos = cTileWorld.WorldToScreen(t.vWorldPos);
             glm::vec2 vScalar = cTileWorld.GetWorldScale();
 
@@ -89,6 +98,9 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
                 cEmptyTileSprite.DrawColored(cRenderer, vTileScreenPos, vScalar);
         }
     }
+
+    if (m_bDebug)
+        m_bDebug = false;
 }
 
 
@@ -184,6 +196,10 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
 void Ship::AddTile(glm::ivec2 vTilePos)
 {
     std::shared_ptr<Room> pCurRoom = GetCurrentRoom(vTilePos);
+
+    if (pCurRoom == nullptr)
+        return;
+
     glm::ivec2 vUL = pCurRoom->vUpperLeftPos;
 
     if (vTilePos.x >= vUL.x && vTilePos.y >= vUL.y &&
@@ -202,6 +218,10 @@ void Ship::AddTile(glm::ivec2 vTilePos)
 void Ship::RemoveTile(glm::ivec2 vTilePos)
 {
     std::shared_ptr<Room> pCurRoom = GetCurrentRoom(vTilePos);
+
+    if (pCurRoom == nullptr)
+        return;
+
     glm::ivec2 vUL = pCurRoom->vUpperLeftPos;
 
     if (vTilePos.x >= vUL.x && vTilePos.y >= vUL.y &&
@@ -297,7 +317,7 @@ void Ship::LoadFromFile(const char* cFilename)
         fin.open(cFilename);
     }
 
-    std::vector<std::string> vecWorld;
+    std::vector<std::vector<std::string>> vecWorld;
     std::string sLine;
 
     /**************************************************/
@@ -310,6 +330,8 @@ void Ship::LoadFromFile(const char* cFilename)
         std::stringstream ss;
         ss << sLine;
         char c;
+
+        std::vector<std::string> vecRoomStr;
 
         /*************************************/
         /*    Parse out map data elements    */
@@ -335,10 +357,13 @@ void Ship::LoadFromFile(const char* cFilename)
                 ss.get(c);
                 ssa << c;
             }
-            vecWorld.push_back(ssa.str());
+            vecRoomStr.push_back(ssa.str());
         }
+
+        vecWorld.push_back(vecRoomStr);
     }
 
+    std::cout << "vecWorld size: " << vecWorld.size() << std::endl;
     /****************************************************/
     /*    Generate world from std::vector of strings    */
     /****************************************************/
@@ -356,86 +381,95 @@ void Ship::LoadFromFile(const char* cFilename)
     /****************************/
     /*    Read position data    */
     /****************************/
-    vecRooms.push_back(std::make_shared<Room>());
-    std::stringstream ss;
-    std::stringstream ssa;
-    ss << vecWorld[0][1] << vecWorld[0][2];
-    ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vSize.x;
-
-    ss.str("");
-    ssa.str("");
-    ss.clear();
-    ssa.clear();
-
-    ss << vecWorld[1][1] << vecWorld[1][2];
-    ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vSize.y;
-
-    /*****************************/
-    /*    Read dimension data    */
-    /*****************************/
-    ss.str("");
-    ssa.str("");
-    ss.clear();
-    ssa.clear();
-
-    ss << vecWorld[2][1] << vecWorld[2][2];
-    ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vSize.x;
-
-    ss.str("");
-    ssa.str("");
-    ss.clear();
-    ssa.clear();
-
-    ss << vecWorld[3][1] << vecWorld[3][2];
-    ssa << std::hex << ss.str();
-    ssa >> vecRooms[0]->vSize.y;
-
-    /************************/
-    /*    Read tile data    */
-    /************************/
-    int32_t i = 2;
-    int32_t nEmptyTiles = 0;
-    int32_t nNonEmptyTiles = 0;
-    for (int32_t y = 0; y < vecRooms[0]->vSize.y; y++)
+    for (int32_t n = 0; n < vecWorld.size(); n++)
     {
-        for (int32_t x = 0; x < vecRooms[0]->vSize.x; x++)
+        vecRooms.push_back(std::make_shared<Room>());
+        std::stringstream ss;
+        std::stringstream ssa;
+        ss << vecWorld[n][0][1] << vecWorld[n][0][2];
+        ssa << std::hex << ss.str();
+        ssa >> vecRooms[n]->vUpperLeftPos.x;
+
+        ss.str("");
+        ssa.str("");
+        ss.clear();
+        ssa.clear();
+
+        ss << vecWorld[n][1][1] << vecWorld[n][1][2];
+        ssa << std::hex << ss.str();
+        ssa >> vecRooms[n]->vUpperLeftPos.y;
+
+        /*****************************/
+        /*    Read dimension data    */
+        /*****************************/
+        ss.str("");
+        ssa.str("");
+        ss.clear();
+        ssa.clear();
+
+        ss << vecWorld[n][2][1] << vecWorld[n][2][2];
+        ssa << std::hex << ss.str();
+        ssa >> vecRooms[n]->vSize.x;
+
+        ss.str("");
+        ssa.str("");
+        ss.clear();
+        ssa.clear();
+
+        ss << vecWorld[n][3][1] << vecWorld[n][3][2];
+        ssa << std::hex << ss.str();
+        ssa >> vecRooms[n]->vSize.y;
+
+        /************************/
+        /*    Read tile data    */
+        /************************/
+        int32_t i = 2;
+        int32_t nEmptyTiles = 0;
+        int32_t nNonEmptyTiles = 0;
+        std::cout << "Upper left position: " << glm::to_string(vecRooms[n]->vUpperLeftPos) << std::endl;
+
+        glm::ivec2 vStart = vecRooms[n]->vUpperLeftPos;;
+        glm::ivec2 vEnd   = vecRooms[n]->vUpperLeftPos + vecRooms[n]->vSize;
+        for (int32_t y = vStart.y; y < vEnd.y; y++)
         {
-            if (vecWorld[i] == "#")
+            for (int32_t x = vStart.x; x < vEnd.x; x++)
             {
+                if (vecWorld[n][i] == "#")
+                {
+                    Tile t(glm::ivec2(x, y));
+                    vecRooms[n]->vecTiles.push_back(t);
+                    i++;
+                    nEmptyTiles++;
+                    continue;
+                }
+
+                glm::ivec2 _vTexOffset;
+                std::stringstream ss;
+                std::stringstream ssa;
+                ss << vecWorld[n][i][0];
+                ssa << std::hex << ss.str();
+                ssa >> _vTexOffset.x;
+
+                ss.str("");
+                ssa.str("");
+                ss.clear();
+                ssa.clear();
+
+                ss << vecWorld[n][i][1];
+                ssa << std::hex << ss.str();
+                ssa >> _vTexOffset.y;
+
                 Tile t(glm::ivec2(x, y));
-                vecRooms[0]->vecTiles.push_back(t);
+                t.vTexOffset = _vTexOffset;
+                t.bEmpty = false;
+                nNonEmptyTiles++;
+
+                vecRooms[n]->vecTiles.push_back(t);
+
                 i++;
-                nEmptyTiles++;
-                continue;
             }
-
-            glm::ivec2 _vTexOffset;
-            std::stringstream ss;
-            std::stringstream ssa;
-            ss << vecWorld[i][0];
-            ssa << std::hex << ss.str();
-            ssa >> _vTexOffset.x;
-
-            ss.str("");
-            ssa.str("");
-            ss.clear();
-            ssa.clear();
-
-            ss << vecWorld[i][1];
-            ssa << std::hex << ss.str();
-            ssa >> _vTexOffset.y;
-
-            Tile t(glm::ivec2(x, y));
-            t.vTexOffset = _vTexOffset;
-            t.bEmpty = false;
-            nNonEmptyTiles++;
-
-            vecRooms[0]->vecTiles.push_back(t);
-
-            i++;
         }
     }
+
+    std::cout << "Number of rooms: " << vecRooms.size() << std::endl;
 }

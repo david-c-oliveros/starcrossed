@@ -90,4 +90,6 @@ class Ship
 
     private:
         GameState m_eGameState;
+
+        bool m_bDebug = true;
 };
