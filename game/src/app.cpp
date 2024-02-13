@@ -426,8 +426,20 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_12.txt"))
+            if (!cShip.Create(eGameState, "world_14.txt"))
                 return false;
+
+            int32_t n = 0;
+            for (auto &room : cShip.vecRooms)
+            {
+                std::cout << "Room " << n++ << std::endl;
+                std::cout << "Num Tiles: " << room->vecTiles.size() << std::endl;
+
+                for (auto &t : room->vecTiles)
+                {
+                    std::cout << glm::to_string(t.vWorldPos) << std::endl;
+                }
+            }
             break;
         }
     }
@@ -666,7 +678,7 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     {
         std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
         glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
-        pApp->cShip.AddRoom(vNextPos, glm::ivec2(8));
+        pApp->cShip.AddRoom(vNextPos, glm::ivec2(4));
     }
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)

@@ -43,7 +43,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(8)));
+            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(4)));
 
             break;
         }
@@ -76,19 +76,12 @@ void Ship::SetGameState(GameState _eState)
 
 void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
-    if (m_bDebug)
-        std::cout << "Num Rooms: " << vecRooms.size() << std::endl;
     for (auto &r : vecRooms)
     {
-        if (m_bDebug)
-            std::cout << "Num Tiles: " << r->vecTiles.size() << std::endl;
+        int32_t i = 0;
+        float end = r->vecTiles.size();
         for (auto &t : r->vecTiles)
         {
-//            if (m_bDebug)
-//            {
-//                std::cout << "Tex offset: " << glm::to_string(t.vTexOffset) << std::endl;
-//            }
-
             glm::vec2 vTileScreenPos = cTileWorld.WorldToScreen(t.vWorldPos);
             glm::vec2 vScalar = cTileWorld.GetWorldScale();
 
@@ -96,11 +89,10 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
                 pSpriteSpaceship->Draw(cRenderer, vTileScreenPos, vScalar, glm::vec2(0.1f), t.vTexOffset);
             else if (cTileWorld.GetGameState() == GameState::LEVEL_EDIT)
                 cEmptyTileSprite.DrawColored(cRenderer, vTileScreenPos, vScalar);
+
+            i++;
         }
     }
-
-    if (m_bDebug)
-        m_bDebug = false;
 }
 
 
@@ -423,13 +415,15 @@ void Ship::LoadFromFile(const char* cFilename)
         /************************/
         /*    Read tile data    */
         /************************/
-        int32_t i = 2;
+        int32_t i = 4;
         int32_t nEmptyTiles = 0;
         int32_t nNonEmptyTiles = 0;
         std::cout << "Upper left position: " << glm::to_string(vecRooms[n]->vUpperLeftPos) << std::endl;
 
         glm::ivec2 vStart = vecRooms[n]->vUpperLeftPos;;
         glm::ivec2 vEnd   = vecRooms[n]->vUpperLeftPos + vecRooms[n]->vSize;
+
+        int32_t nCounter = 0;
         for (int32_t y = vStart.y; y < vEnd.y; y++)
         {
             for (int32_t x = vStart.x; x < vEnd.x; x++)
@@ -440,6 +434,7 @@ void Ship::LoadFromFile(const char* cFilename)
                     vecRooms[n]->vecTiles.push_back(t);
                     i++;
                     nEmptyTiles++;
+                    nCounter++;
                     continue;
                 }
 
@@ -467,8 +462,12 @@ void Ship::LoadFromFile(const char* cFilename)
                 vecRooms[n]->vecTiles.push_back(t);
 
                 i++;
+                nCounter++;
             }
         }
+
+        std::cout << "Room " << n << " tile counter: " << nCounter << std::endl;
+        std::cout << "Room " << n << " tile size: " << vecRooms[n]->vecTiles.size() << std::endl;
     }
 
     std::cout << "Number of rooms: " << vecRooms.size() << std::endl;
