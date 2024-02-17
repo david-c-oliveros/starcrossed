@@ -44,7 +44,7 @@ bool App::Create()
 
     LoadResources();
 
-    SetGameState(GameState::PLAY);
+    SetGameState(GameState::LEVEL_EDIT);
 
     if (!ConfigEntities())
         return false;
@@ -283,6 +283,7 @@ void App::RenderUI()
     {
         case(GameState::LEVEL_EDIT):
         {
+            m_cUI.RenderLevelEditPanel(glm::ivec2(400, 400));
             break;
         }
 
@@ -426,7 +427,7 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_14.txt"))
+            if (!cShip.Create(eGameState, "world_2.txt"))
                 return false;
 
             int32_t n = 0;

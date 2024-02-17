@@ -22,7 +22,7 @@ struct Tile
 class Room
 {
     public:
-        Room(glm::ivec2 _vUpperLeftPos = glm::ivec2(0), glm::ivec2 _vSize = glm::ivec2(4));
+        Room(bool bNew, glm::ivec2 _vUpperLeftPos = glm::ivec2(0), glm::ivec2 _vSize = glm::ivec2(4));
         ~Room();
 
 

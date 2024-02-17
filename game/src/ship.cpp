@@ -43,8 +43,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            vecRooms.push_back(std::make_shared<Room>(glm::ivec2(), glm::ivec2(4)));
-
+            AddRoom(glm::ivec2(0), glm::ivec2(4));
             break;
         }
 
@@ -171,7 +170,9 @@ bool Ship::EmptyTile(glm::ivec2 vTilePos)
     if (vTilePos.x < vUL.x || vTilePos.y < vUL.y ||
         vTilePos.x >= vUL.x + pCurRoom->vSize.x ||
         vTilePos.y >= vUL.y + pCurRoom->vSize.y)
+    {
         return false;
+    }
 
     uint32_t nIndex = (vTilePos.y - vUL.y) * pCurRoom->vSize.x + (vTilePos.x - vUL.x);
 
@@ -230,7 +231,7 @@ void Ship::RemoveTile(glm::ivec2 vTilePos)
 
 bool Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
 {
-    vecRooms.push_back(std::make_shared<Room>(vPos, vSize));
+    vecRooms.push_back(std::make_shared<Room>(true, vPos, vSize));
 
     return true;
 }
@@ -375,7 +376,7 @@ void Ship::LoadFromFile(const char* cFilename)
     /****************************/
     for (int32_t n = 0; n < vecWorld.size(); n++)
     {
-        vecRooms.push_back(std::make_shared<Room>());
+        vecRooms.push_back(std::make_shared<Room>(false));
         std::stringstream ss;
         std::stringstream ssa;
         ss << vecWorld[n][0][1] << vecWorld[n][0][2];
