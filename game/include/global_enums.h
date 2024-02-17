@@ -12,6 +12,16 @@ enum class Direction
 
 
 
+enum class CarDir
+{
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST
+};
+
+
+
 enum class GameState
 {
     LEVEL_EDIT,

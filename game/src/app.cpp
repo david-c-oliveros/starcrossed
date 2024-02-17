@@ -187,6 +187,46 @@ bool App::Update()
         m_cUI.bNewEvent = false;
     }
 
+    if (m_cUI.bNewRoomNorth)
+    {
+        std::shared_ptr<Room> pLastRoom = cShip.GetFurthestRoom(CarDir::NORTH);
+        glm::ivec2 vNextPos = pLastRoom->vUpperLeftPos - glm::ivec2(0, pLastRoom->vSize.y);
+        vNextPos.x = 0;
+
+        cShip.AddRoom(vNextPos, glm::ivec2(4));
+        m_cUI.bNewRoomNorth = false;
+    }
+
+    if (m_cUI.bNewRoomSouth)
+    {
+        std::shared_ptr<Room> pLastRoom = cShip.GetFurthestRoom(CarDir::SOUTH);
+        glm::ivec2 vNextPos = pLastRoom->vUpperLeftPos + glm::ivec2(0, pLastRoom->vSize.y);
+        vNextPos.x = 0;
+
+        cShip.AddRoom(vNextPos, glm::ivec2(4));
+        m_cUI.bNewRoomSouth = false;
+    }
+
+    if (m_cUI.bNewRoomEast)
+    {
+        std::shared_ptr<Room> pLastRoom = cShip.GetFurthestRoom(CarDir::EAST);
+        glm::ivec2 vNextPos = pLastRoom->vUpperLeftPos + glm::ivec2(pLastRoom->vSize.x, 0);
+        vNextPos.y = 0;
+
+        cShip.AddRoom(vNextPos, glm::ivec2(4));
+        m_cUI.bNewRoomEast = false;
+    }
+
+    if (m_cUI.bNewRoomWest)
+    {
+        std::shared_ptr<Room> pLastRoom = cShip.GetFurthestRoom(CarDir::WEST);
+        glm::ivec2 vNextPos = pLastRoom->vUpperLeftPos - glm::ivec2(pLastRoom->vSize.x, 0);
+        vNextPos.y = 0;
+
+        cShip.AddRoom(vNextPos, glm::ivec2(4));
+        m_cUI.bNewRoomWest = false;
+    }
+
     cI.IsHovered(cTileWorld, GetCursorScreenPos());
 
     ProcessInput();
@@ -675,12 +715,12 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     if (pApp->eGameState != GameState::LEVEL_EDIT)
         return;
 
-    if (key == GLFW_KEY_N && action == GLFW_PRESS)
-    {
-        std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
-        glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
-        pApp->cShip.AddRoom(vNextPos, glm::ivec2(4));
-    }
+//    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+//    {
+//        std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
+//        glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
+//        pApp->cShip.AddRoom(vNextPos, glm::ivec2(4));
+//    }
 
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {

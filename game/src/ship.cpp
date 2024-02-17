@@ -238,6 +238,86 @@ bool Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
 
 
 
+std::shared_ptr<Room> Ship::GetFurthestRoom(CarDir eDir)
+{
+    switch(eDir)
+    {
+        case(CarDir::NORTH):
+        {
+            int32_t nFurthest = 0;
+            uint32_t nIndex = 0;
+            for (int32_t i = 0; i < vecRooms.size(); i++)
+            {
+                if (nFurthest < vecRooms[i]->vUpperLeftPos.y)
+                    continue;
+
+                nFurthest = vecRooms[i]->vUpperLeftPos.y;
+                nIndex = i;
+            }
+
+            return vecRooms[nIndex];
+
+            break;
+        }
+
+        case(CarDir::SOUTH):
+        {
+            int32_t nFurthest = 0;
+            uint32_t nIndex = 0;
+            for (int32_t i = 0; i < vecRooms.size(); i++)
+            {
+                if (nFurthest > vecRooms[i]->vUpperLeftPos.y)
+                    continue;
+
+                nFurthest = vecRooms[i]->vUpperLeftPos.y;
+                nIndex = i;
+            }
+
+            return vecRooms[nIndex];
+
+            break;
+        }
+
+        case(CarDir::EAST):
+        {
+            int32_t nFurthest = 0;
+            uint32_t nIndex = 0;
+            for (int32_t i = 0; i < vecRooms.size(); i++)
+            {
+                if (nFurthest > vecRooms[i]->vUpperLeftPos.x)
+                    continue;
+
+                nFurthest = vecRooms[i]->vUpperLeftPos.x;
+                nIndex = i;
+            }
+
+            return vecRooms[nIndex];
+
+            break;
+        }
+
+        case(CarDir::WEST):
+        {
+            int32_t nFurthest = 0;
+            uint32_t nIndex = 0;
+            for (int32_t i = 0; i < vecRooms.size(); i++)
+            {
+                if (nFurthest < vecRooms[i]->vUpperLeftPos.x)
+                    continue;
+
+                nFurthest = vecRooms[i]->vUpperLeftPos.x;
+                nIndex = i;
+            }
+
+            return vecRooms[nIndex];
+
+            break;
+        }
+    }
+}
+
+
+
 bool Ship::SaveToFile(std::string sFilename)
 {
     if (std::filesystem::exists(sFilename))
