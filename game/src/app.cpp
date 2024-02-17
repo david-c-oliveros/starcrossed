@@ -279,8 +279,8 @@ void App::RenderApp()
 //    pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
 
     cShip.Draw(cRenderer, cTileWorld);
+
 //    cShip.DrawDoorInteractables(cRenderer, cTileWorld);
-    pPlayer->Draw(cRenderer, cTileWorld);
 
 //    if (cI.IsHovered(cTileWorld, GetCursorScreenPos()))
 //        cI.Draw(cRenderer, cTileWorld);
@@ -288,12 +288,29 @@ void App::RenderApp()
 //    for (auto &d : cShip.vecDoors)
 //        d.cI.Draw(cRenderer, cTileWorld);
 
-    if (eGameState == GameState::LEVEL_EDIT)
+    switch(eGameState)
     {
-        if (m_bErase)
-            cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
-        else
-            cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
+        case(GameState::PLAY):
+        {
+            pPlayer->Draw(cRenderer, cTileWorld);
+
+            break;
+        }
+
+        case(GameState::LEVEL_EDIT):
+        {
+
+            std::shared_ptr<Room> pCurrentRoom = cShip.GetCurrentRoom(cTileWorld.ScreenToWorld(GetCursorScreenPos()));
+            if (pCurrentRoom != nullptr)
+                cShip.DrawSelectedOutline(cRenderer, cTileWorld, pCurrentRoom);
+
+            if (m_bErase)
+                cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
+            else
+                cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
+
+            break;
+        }
     }
 }
 
@@ -439,6 +456,7 @@ void App::LoadResources()
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-8.png", true, "rock_idle_right");
 
     ResourceManager::LoadTexture("../../res/Space Background.png", true, "bg_space_01");
+    ResourceManager::LoadTexture("../../res/Outline.png", true, "outline_sprite");
 
     // TODO - Figure out "cannot bind non-const lvalue reference of type 'Shader&' to an rvalue of type 'Shader'" error
 

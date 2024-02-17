@@ -52,7 +52,7 @@ class Ship
         bool Create(GameState _eGameState, const char* sFileName = "");
         void SetGameState(GameState _eGameState);
 
-        std::shared_ptr<Room> GetCurrentRoom(glm::ivec2 vTilePos);
+        std::shared_ptr<Room> GetCurrentRoom(glm::vec2 vTilePos);
         bool EmptyTile(glm::ivec2 vTilePos);
         void AddTile(glm::ivec2 vTilePos);
         void RemoveTile(glm::ivec2 vTilePos);
@@ -64,6 +64,7 @@ class Ship
         void LoadFromFile(const char* cFilename);
 
         void Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
+        void DrawSelectedOutline(SpriteRenderer &cRenderer, TileWorld &cTileWorld, std::shared_ptr<Room> pCurrentRoom);
         void DrawDoorInteractables(SpriteRenderer &cRenderer, TileWorld &cTileWorld);
 
         void UpdateRooms();
@@ -75,6 +76,7 @@ class Ship
         std::vector<std::string> vecDebugInfo;
 
         std::unique_ptr<Sprite> pSpriteSpaceship;
+        std::unique_ptr<Sprite> pOutlineSprite;
         // TEMP!!
         Sprite cEmptyTileSprite;
 

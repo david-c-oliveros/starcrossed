@@ -15,6 +15,8 @@ Ship::Ship()
     /*        Sprite things        */
     /*******************************/
     pSpriteSpaceship = std::make_unique<Sprite>("spaceship_sheet");
+    pOutlineSprite = std::make_unique<Sprite>("outline_sprite");
+//    pOutlineSprite->SetColor(glm::vec3(0.7f, 0.7f, 0.7f));
     cEmptyTileSprite.SetColor(glm::vec3(0.15f, 0.22f, 0.5f));
 
     uint32_t nSheetWidth = 10;
@@ -96,6 +98,16 @@ void Ship::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 
 
 
+void Ship::DrawSelectedOutline(SpriteRenderer &cRenderer, TileWorld &cTileWorld, std::shared_ptr<Room> pCurrentRoom)
+{
+    glm::vec2 vScreenPos = cTileWorld.WorldToScreen(pCurrentRoom->vUpperLeftPos);
+    glm::vec2 vScalar = cTileWorld.GetWorldScale() * (glm::vec2)pCurrentRoom->vSize;
+
+    pOutlineSprite->Draw(cRenderer, vScreenPos, vScalar, glm::vec2(1.0f), glm::vec2(0.0f));
+}
+
+
+
 // TEMP!!
 void Ship::DrawDoorInteractables(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
@@ -139,7 +151,7 @@ void Ship::ActivateEvent(Event &cEvent)
 
 
 
-std::shared_ptr<Room> Ship::GetCurrentRoom(glm::ivec2 vTilePos)
+std::shared_ptr<Room> Ship::GetCurrentRoom(glm::vec2 vTilePos)
 {
     for (auto room : vecRooms)
     {
