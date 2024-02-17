@@ -67,8 +67,9 @@ class App
         void GLConfig();
         void UIConfig();
 
-        static void ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset);
+        static void MouseButtonCallback(GLFWwindow* pWindow, int button, int action, int mods);
         static void KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mods);
+        static void ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset);
         static void FramebufferSizeCallback(GLFWwindow* pWindow, int nWidth, int nHeight);
 
 
@@ -96,7 +97,6 @@ class App
 
         std::unique_ptr<Player> pPlayer;
         Ship cShip;
-        //std::unique_ptr<Ship>   pShip;
 
     private:
         Interactable cI;
@@ -114,13 +114,17 @@ class App
         /****************************/
         /*        Map Editor        */
         /****************************/
-        bool m_bTileSelectMod = false;
+        bool m_bSelectMod = false;
         bool m_bErase = false;
         uint32_t nCurFileNum = 0;
+
+        std::shared_ptr<Room> m_pSelectedRoom;
 
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
         glm::ivec2 m_vCursorTile;
         Sprite cCursorTileSprite;
+
+
         std::unique_ptr<Sprite> pBGSprite;
 
         std::vector<std::string> m_vecThisDebugInfo;

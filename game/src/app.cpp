@@ -119,6 +119,7 @@ void App::GLConfig()
 
     glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetWindowUserPointer(pWindow, this);
+    glfwSetMouseButtonCallback(pWindow, MouseButtonCallback);
     glfwSetKeyCallback(pWindow, KeyCallback);
 //    glfwSetCursorPosCallback(pWindow, MouseCallback);
     glfwSetScrollCallback(pWindow, ScrollCallback);
@@ -300,14 +301,23 @@ void App::RenderApp()
         case(GameState::LEVEL_EDIT):
         {
 
-            std::shared_ptr<Room> pCurrentRoom = cShip.GetCurrentRoom(cTileWorld.ScreenToWorld(GetCursorScreenPos()));
-            if (pCurrentRoom != nullptr)
-                cShip.DrawSelectedOutline(cRenderer, cTileWorld, pCurrentRoom);
+            std::shared_ptr<Room> pHoveredRoom = cShip.GetCurrentRoom(cTileWorld.ScreenToWorld(GetCursorScreenPos()));
+            if (pHoveredRoom != nullptr)
+            {
+                cShip.pOutlineSprite->SetColor(glm::vec3(1.0f));
+                cShip.DrawSelectedOutline(cRenderer, cTileWorld, pHoveredRoom);
+            }
+
+            if (m_pSelectedRoom != nullptr)
+            {
+                cShip.pOutlineSprite->SetColor(glm::vec3(0.5f, 0.5f, 0.8f));
+                cShip.DrawSelectedOutline(cRenderer, cTileWorld, m_pSelectedRoom);
+            }
 
             if (m_bErase)
-                cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
-            else
-                cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * BASE_TILE_SIZE * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
+                cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
+            else if (!m_bSelectMod)
+                cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
 
             break;
         }
@@ -593,11 +603,11 @@ void App::ProcessInput()
     {
         if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         {
-            m_bTileSelectMod = true;
+            m_bSelectMod = true;
         }
         else
         {
-            m_bTileSelectMod = false;
+            m_bSelectMod = false;
         }
     }
 }
@@ -669,8 +679,22 @@ void App::ProcessMouseInput()
 /*        L:Mouse Callback        */
 /*                                */
 /**********************************/
-void MouseCallback(GLFWwindow* pWindow, double fPosInX, double fPosInY)
+void App::MouseButtonCallback(GLFWwindow* pWindow, int button, int action, int mods)
 {
+    App* pApp = static_cast<App*>(glfwGetWindowUserPointer(pWindow));
+    /********************************************/
+    /*                                          */
+    /*        L:Level Edit mode specific        */
+    /*                                          */
+    /********************************************/
+    if (pApp->eGameState != GameState::LEVEL_EDIT)
+        return;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && pApp->m_bSelectMod)
+    {
+        std::cout << "Selecting room" << std::endl;
+        pApp->m_pSelectedRoom = pApp->cShip.GetCurrentRoom(pApp->cTileWorld.ScreenToWorld(pApp->GetCursorScreenPos()));
+    }
 }
 
 
@@ -733,13 +757,6 @@ void App::KeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, in
     if (pApp->eGameState != GameState::LEVEL_EDIT)
         return;
 
-//    if (key == GLFW_KEY_N && action == GLFW_PRESS)
-//    {
-//        std::shared_ptr<Room> pLastRoom = pApp->cShip.vecRooms[pApp->cShip.vecRooms.size() - 1];
-//        glm::ivec2 vNextPos = glm::ivec2(pLastRoom->vSize.x, 0) + pLastRoom->vUpperLeftPos;
-//        pApp->cShip.AddRoom(vNextPos, glm::ivec2(4));
-//    }
-
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
     {
         std::stringstream ss;
@@ -763,7 +780,7 @@ void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
 {
     App* pApp = static_cast<App*>(glfwGetWindowUserPointer(pWindow));
 
-    if (pApp->m_bTileSelectMod)
+    if (pApp->m_bSelectMod)
     {
         if (yoffset > 0)
         {

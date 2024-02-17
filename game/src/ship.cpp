@@ -16,7 +16,6 @@ Ship::Ship()
     /*******************************/
     pSpriteSpaceship = std::make_unique<Sprite>("spaceship_sheet");
     pOutlineSprite = std::make_unique<Sprite>("outline_sprite");
-//    pOutlineSprite->SetColor(glm::vec3(0.7f, 0.7f, 0.7f));
     cEmptyTileSprite.SetColor(glm::vec3(0.15f, 0.22f, 0.5f));
 
     uint32_t nSheetWidth = 10;
