@@ -240,11 +240,11 @@ void Ship::RemoveTile(glm::ivec2 vTilePos)
 
 
 
-bool Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
+std::shared_ptr<Room> Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
 {
     vecRooms.push_back(std::make_shared<Room>(true, vPos, vSize));
 
-    return true;
+    return vecRooms[vecRooms.size() - 1];
 }
 
 

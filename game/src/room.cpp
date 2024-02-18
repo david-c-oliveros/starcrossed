@@ -7,6 +7,7 @@ Room::Room(bool bNew, glm::ivec2 _vUpperLeftPos, glm::ivec2 _vSize)
 {
     if (bNew)
     {
+        aOpenSides = { true, true, true, true };
         glm::ivec2 vEnd = vUpperLeftPos + vSize;
         for (int32_t y = vUpperLeftPos.y; y < vEnd.y; y++)
         {

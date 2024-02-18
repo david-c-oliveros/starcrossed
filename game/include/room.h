@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 
 #include <glm/glm.hpp>
 
@@ -34,4 +35,5 @@ class Room
         bool bOpenToVacuum = false;
 
         std::vector<Tile> vecTiles;
+        std::array<bool, 4> aOpenSides;
 };
