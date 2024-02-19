@@ -31,6 +31,8 @@ class Room
         glm::ivec2 vSize;
         glm::ivec2 vUpperLeftPos;
 
+        int32_t nIndex = 0;
+
         float fAirPressure;
         bool bOpenToVacuum = false;
 

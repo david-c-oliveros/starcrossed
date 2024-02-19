@@ -40,7 +40,7 @@ class App
         App(uint32_t _nCanvasWidth, uint32_t _nCanvasHeight);
         ~App();
 
-        bool Create();
+        bool Create(const char* str);
         void Destroy();
         bool Update();
         void UpdateCursorTile();
@@ -104,7 +104,6 @@ class App
 
         std::vector<Event> m_vecAllEvents;
 
-        //std::unique_ptr<ImGuiIO> io;
         ImGuiIO io;
         ImGuiStyle style;
         ImVec4 m_vUIClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -114,11 +113,13 @@ class App
         /****************************/
         /*        Map Editor        */
         /****************************/
-        bool m_bSelectMod = false;
+        bool m_bCtrlHeld = false;
+        bool m_bShiftHeld = false;
         bool m_bErase = false;
         uint32_t nCurFileNum = 0;
 
         std::shared_ptr<Room> m_pSelectedRoom;
+        glm::ivec2 m_vNextRoomSize = glm::ivec2(8);
 
         glm::vec2 m_vCursorMoveDelta = glm::vec2(0.0f);
         glm::ivec2 m_vCursorTile;

@@ -2,6 +2,6 @@
 
 pushd out/build/bin
 
-./game
+./game play
 
 popd

@@ -34,7 +34,7 @@ App::~App()
 /*        L:Create        */
 /*                        */
 /**************************/
-bool App::Create()
+bool App::Create(const char* str)
 {
     if (!GLInit())
         return false;
@@ -44,7 +44,32 @@ bool App::Create()
 
     LoadResources();
 
-    SetGameState(GameState::LEVEL_EDIT);
+    std::map<std::string, int32_t> mMode = {{ "edit", 0 }, { "play", 1 }};
+
+    for (auto c : mMode)
+        std::cout << c.first << "->" << c.second << std::endl;
+    std::cout << std::endl;
+
+    switch(mMode[std::string(str)])
+    {
+        case(0):
+        {
+            std::cout << "Running in edit mode" << std::endl;
+            SetGameState(GameState::LEVEL_EDIT);
+            break;
+        }
+
+        case(1):
+        {
+            std::cout << "Running in play mode" << std::endl;
+            SetGameState(GameState::PLAY);
+            break;
+        }
+    }
+
+    for (auto c : mMode)
+        std::cout << c.first << "->" << c.second << std::endl;
+    std::cout << std::endl;
 
     if (!ConfigEntities())
         return false;
@@ -188,60 +213,29 @@ bool App::Update()
         m_cUI.bNewEvent = false;
     }
 
+
     if (m_cUI.bNewRoomNorth)
     {
-        if (m_pSelectedRoom != nullptr && m_pSelectedRoom->aOpenSides[(int32_t)CarDir::NORTH])
-        {
-            glm::ivec2 vNextPos = m_pSelectedRoom->vUpperLeftPos - glm::ivec2(0, m_pSelectedRoom->vSize.y);
-
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::NORTH] = false;
-            m_pSelectedRoom = cShip.AddRoom(vNextPos, glm::ivec2(4));
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::SOUTH] = false;
-        }
-
+        m_pSelectedRoom = cShip.AddRoomFromSelected(m_pSelectedRoom, CarDir::NORTH, m_vNextRoomSize);
         m_cUI.bNewRoomNorth = false;
     }
 
     if (m_cUI.bNewRoomSouth)
     {
 
-        if (m_pSelectedRoom != nullptr && m_pSelectedRoom->aOpenSides[(int32_t)CarDir::SOUTH])
-        {
-            glm::ivec2 vNextPos = m_pSelectedRoom->vUpperLeftPos + glm::ivec2(0, m_pSelectedRoom->vSize.y);
-
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::SOUTH] = false;
-            m_pSelectedRoom = cShip.AddRoom(vNextPos, glm::ivec2(4));
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::NORTH] = false;
-        }
-
+        m_pSelectedRoom = cShip.AddRoomFromSelected(m_pSelectedRoom, CarDir::SOUTH, m_vNextRoomSize);
         m_cUI.bNewRoomSouth = false;
     }
 
     if (m_cUI.bNewRoomEast)
     {
-        if (m_pSelectedRoom != nullptr && m_pSelectedRoom->aOpenSides[(int32_t)CarDir::EAST])
-        {
-            glm::ivec2 vNextPos = m_pSelectedRoom->vUpperLeftPos + glm::ivec2(m_pSelectedRoom->vSize.x, 0);
-
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::EAST] = false;
-            m_pSelectedRoom = cShip.AddRoom(vNextPos, glm::ivec2(4));
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::WEST] = false;
-        }
-
+        m_pSelectedRoom = cShip.AddRoomFromSelected(m_pSelectedRoom, CarDir::EAST, m_vNextRoomSize);
         m_cUI.bNewRoomEast = false;
     }
 
     if (m_cUI.bNewRoomWest)
     {
-        if (m_pSelectedRoom != nullptr && m_pSelectedRoom->aOpenSides[(int32_t)CarDir::WEST])
-        {
-            glm::ivec2 vNextPos = m_pSelectedRoom->vUpperLeftPos - glm::ivec2(m_pSelectedRoom->vSize.x, 0);
-
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::WEST] = false;
-            m_pSelectedRoom = cShip.AddRoom(vNextPos, glm::ivec2(4));
-            m_pSelectedRoom->aOpenSides[(int32_t)CarDir::EAST] = false;
-        }
-
+        m_pSelectedRoom = cShip.AddRoomFromSelected(m_pSelectedRoom, CarDir::WEST, m_vNextRoomSize);
         m_cUI.bNewRoomWest = false;
     }
 
@@ -319,7 +313,7 @@ void App::RenderApp()
         {
 
             std::shared_ptr<Room> pHoveredRoom = cShip.GetCurrentRoom(cTileWorld.ScreenToWorld(GetCursorScreenPos()));
-            if (pHoveredRoom != nullptr && m_bSelectMod)
+            if (pHoveredRoom != nullptr && m_bShiftHeld)
             {
                 cShip.pOutlineSprite->SetColor(glm::vec3(1.0f));
                 cShip.DrawSelectedOutline(cRenderer, cTileWorld, pHoveredRoom);
@@ -333,7 +327,7 @@ void App::RenderApp()
 
             if (m_bErase)
                 cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
-            else if (!m_bSelectMod)
+            else if (!m_bShiftHeld)
                 cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
 
             break;
@@ -514,7 +508,7 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_2.txt"))
+            if (!cShip.Create(eGameState, "world_4.txt"))
                 return false;
 
             int32_t n = 0;
@@ -622,11 +616,20 @@ void App::ProcessInput()
     {
         if (glfwGetKey(pWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         {
-            m_bSelectMod = true;
+            m_bCtrlHeld = true;
         }
         else
         {
-            m_bSelectMod = false;
+            m_bCtrlHeld = false;
+        }
+
+        if (glfwGetKey(pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        {
+            m_bShiftHeld = true;
+        }
+        else
+        {
+            m_bShiftHeld = false;
         }
     }
 }
@@ -668,12 +671,12 @@ void App::ProcessMouseInput()
         else
             m_bErase = false;
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cShip.EmptyTile(m_vCursorTile) && !m_bSelectMod)
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && cShip.EmptyTile(m_vCursorTile) && !m_bShiftHeld)
         {
             cShip.AddTile(m_vCursorTile);
         }
 
-        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cShip.EmptyTile(m_vCursorTile) && !m_bSelectMod)
+        if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !cShip.EmptyTile(m_vCursorTile) && !m_bShiftHeld)
         {
             cShip.RemoveTile(m_vCursorTile);
         }
@@ -709,7 +712,7 @@ void App::MouseButtonCallback(GLFWwindow* pWindow, int button, int action, int m
     if (pApp->eGameState != GameState::LEVEL_EDIT)
         return;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && pApp->m_bSelectMod)
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && pApp->m_bShiftHeld)
     {
         std::cout << "Selecting room" << std::endl;
         pApp->m_pSelectedRoom = pApp->cShip.GetCurrentRoom(pApp->cTileWorld.ScreenToWorld(pApp->GetCursorScreenPos()));
@@ -799,7 +802,7 @@ void App::ScrollCallback(GLFWwindow* pWindow, double xoffset, double yoffset)
 {
     App* pApp = static_cast<App*>(glfwGetWindowUserPointer(pWindow));
 
-    if (pApp->m_bSelectMod)
+    if (pApp->m_bCtrlHeld)
     {
         if (yoffset > 0)
         {

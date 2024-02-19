@@ -44,7 +44,7 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            AddRoom(glm::ivec2(0), glm::ivec2(4));
+            AddRoom(glm::ivec2(0), glm::ivec2(8));
             break;
         }
 
@@ -243,8 +243,62 @@ void Ship::RemoveTile(glm::ivec2 vTilePos)
 std::shared_ptr<Room> Ship::AddRoom(glm::ivec2 vPos, glm::ivec2 vSize)
 {
     vecRooms.push_back(std::make_shared<Room>(true, vPos, vSize));
+    vecRooms[vecRooms.size() - 1]->nIndex = vecRooms.size() - 1;
 
     return vecRooms[vecRooms.size() - 1];
+}
+
+
+
+std::shared_ptr<Room> Ship::AddRoomFromSelected(std::shared_ptr<Room> pSelectedRoom, CarDir eDir, glm::ivec2 vSize)
+{
+    if (pSelectedRoom != nullptr && pSelectedRoom->aOpenSides[(int32_t)eDir])
+    {
+        pSelectedRoom->aOpenSides[(int32_t)eDir] = false;
+
+        glm::ivec2 vNextPos;
+
+        std::shared_ptr<Room> pNewRoom;
+
+        switch(eDir)
+        {
+            case(CarDir::NORTH):
+            {
+                vNextPos = pSelectedRoom->vUpperLeftPos - glm::ivec2(0, vSize.y);
+                pNewRoom = AddRoom(vNextPos, vSize);
+                pNewRoom->aOpenSides[(int32_t)CarDir::SOUTH] = false;
+                break;
+            }
+
+            case(CarDir::SOUTH):
+            {
+                vNextPos = pSelectedRoom->vUpperLeftPos + glm::ivec2(0, pSelectedRoom->vSize.y);
+                pNewRoom = AddRoom(vNextPos, vSize);
+                pNewRoom->aOpenSides[(int32_t)CarDir::NORTH] = false;
+                break;
+            }
+
+            case(CarDir::EAST):
+            {
+                vNextPos = pSelectedRoom->vUpperLeftPos + glm::ivec2(pSelectedRoom->vSize.x, 0);
+                pNewRoom = AddRoom(vNextPos, vSize);
+                pNewRoom->aOpenSides[(int32_t)CarDir::WEST] = false;
+                break;
+            }
+
+            case(CarDir::WEST):
+            {
+                vNextPos = pSelectedRoom->vUpperLeftPos - glm::ivec2(vSize.x, 0);
+                pNewRoom = AddRoom(vNextPos, vSize);
+                pNewRoom->aOpenSides[(int32_t)CarDir::EAST] = false;
+                break;
+            }
+        }
+
+        return pNewRoom;
+    }
+    else
+        return nullptr;
 }
 
 
@@ -351,6 +405,8 @@ bool Ship::SaveToFile(std::string sFilename)
 
         ssa << "t";
 
+        std::cout << ssa.str() << std::endl;
+
         fOutFile << ssa.str();
         for (auto &t : r->vecTiles)
         {
@@ -372,7 +428,7 @@ bool Ship::SaveToFile(std::string sFilename)
         fOutFile << '\n';
     }
 
-//    fOutFile.close();
+    fOutFile.close();
 
     return true;
 }

@@ -58,6 +58,7 @@ class Ship
         void RemoveTile(glm::ivec2 vTilePos);
 
         std::shared_ptr<Room> AddRoom(glm::ivec2 vPos, glm::ivec2 vSize);
+        std::shared_ptr<Room> AddRoomFromSelected(std::shared_ptr<Room> pSelectedRoom, CarDir eDir, glm::ivec2 vSize);
         std::shared_ptr<Room> GetFurthestRoom(CarDir eDir);
 
         bool SaveToFile(std::string sFilename);

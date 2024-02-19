@@ -4,9 +4,9 @@
 App gameApp((int)(1920 * 1.0), (int)(1080 * 1.0));
 
 
-int main()
+int main(int argc, const char* argv[])
 {
-    gameApp.Create();
+    gameApp.Create(argv[1]);
 
     while(gameApp.Update()) {}
     

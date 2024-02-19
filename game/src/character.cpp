@@ -66,7 +66,6 @@ void Character::StartSpriteAnim()
 {
     for (std::map<std::string, AnimatedSprite>::iterator iter = mSprites.begin(); iter != mSprites.end(); ++iter)
     {
-        std::cout << "Starting animation for sprite: " << iter->first << std::endl;;
         iter->second.StartAnim();
     }
 }
