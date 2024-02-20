@@ -46,30 +46,20 @@ bool App::Create(const char* str)
 
     std::map<std::string, int32_t> mMode = {{ "edit", 0 }, { "play", 1 }};
 
-    for (auto c : mMode)
-        std::cout << c.first << "->" << c.second << std::endl;
-    std::cout << std::endl;
-
     switch(mMode[std::string(str)])
     {
         case(0):
         {
-            std::cout << "Running in edit mode" << std::endl;
             SetGameState(GameState::LEVEL_EDIT);
             break;
         }
 
         case(1):
         {
-            std::cout << "Running in play mode" << std::endl;
             SetGameState(GameState::PLAY);
             break;
         }
     }
-
-    for (auto c : mMode)
-        std::cout << c.first << "->" << c.second << std::endl;
-    std::cout << std::endl;
 
     if (!ConfigEntities())
         return false;
@@ -303,7 +293,7 @@ void App::RenderApp()
         case(GameState::PLAY):
         {
 
-            pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
+//            pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
             pPlayer->Draw(cRenderer, cTileWorld);
 
             break;
@@ -508,20 +498,8 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_4.txt"))
+            if (!cShip.Create(eGameState, "world_13.txt"))
                 return false;
-
-            int32_t n = 0;
-            for (auto &room : cShip.vecRooms)
-            {
-                std::cout << "Room " << n++ << std::endl;
-                std::cout << "Num Tiles: " << room->vecTiles.size() << std::endl;
-
-                for (auto &t : room->vecTiles)
-                {
-                    std::cout << glm::to_string(t.vWorldPos) << std::endl;
-                }
-            }
             break;
         }
     }

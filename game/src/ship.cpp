@@ -400,12 +400,25 @@ bool Ship::SaveToFile(std::string sFilename)
         /*        Write room dimensions        */
         /***************************************/
         std::stringstream ssa;
-        ssa << "x" << std::hex << std::setfill('0') << std::setw(2) << r->vUpperLeftPos.x << "y" << std::hex << std::setfill('0') << std::setw(2) << r->vUpperLeftPos.y <<
-               "w" << std::hex << std::setfill('0') << std::setw(2) << r->vSize.x << "h"         << std::hex << std::setfill('0') << std::setw(2) << r->vSize.y;
+
+        int32_t vAbsTmp;
+
+        ssa << "x";
+        vAbsTmp = std::abs(r->vUpperLeftPos.x);
+        if (r->vUpperLeftPos.x < 0)
+            ssa << "-";
+        ssa << std::hex << std::setfill('0') << std::setw(2) << vAbsTmp;
+
+        ssa << "y";
+        vAbsTmp = std::abs(r->vUpperLeftPos.y);
+        if (r->vUpperLeftPos.x < 0)
+            ssa << "-";
+        ssa << std::hex << std::setfill('0') << std::setw(2) << vAbsTmp;
+
+        ssa << "w" << std::hex << std::setfill('0') << std::setw(2) << r->vSize.x << "h"
+            << std::hex << std::setfill('0') << std::setw(2) << r->vSize.y;
 
         ssa << "t";
-
-        std::cout << ssa.str() << std::endl;
 
         fOutFile << ssa.str();
         for (auto &t : r->vecTiles)
@@ -437,18 +450,6 @@ bool Ship::SaveToFile(std::string sFilename)
 
 void Ship::LoadFromFile(const char* cFilename)
 {
-    // TEMP - Currently only loads one room
-//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(0)));
-//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(64)));
-//    vecRooms.push_back(std::make_shared<Room>(glm::ivec2(128)));
-
-//    vecRooms[0]->fAirPressure = 0.6f;
-//    vecRooms[1]->fAirPressure = 8.0f;
-//
-//    vecDoors.push_back(Door(vecRooms[0], vecRooms[1]));
-//    vecDoors.push_back(Door(vecRooms[1], vecRooms[2]));
-//    vecDoors[0].bOpen = true;
-
     glm::ivec2 vSize(0, 0);
 
     std::ifstream fin;
@@ -466,7 +467,6 @@ void Ship::LoadFromFile(const char* cFilename)
     int32_t nLineNumber = 0;
     while(fin >> sLine)
     {
-        std::cout << "reading line " << ++nLineNumber << std::endl;
         std::stringstream ss;
         ss << sLine;
         char c;
@@ -476,28 +476,50 @@ void Ship::LoadFromFile(const char* cFilename)
         /*************************************/
         /*    Parse out map data elements    */
         /*************************************/
-        while(ss.get(c))
+        ss.get(c);
+        int32_t it = -1;
+        while(true)
         {
-            uint32_t nElementSize = 0;
-
-            if (c == 't')
-                continue;
-
-            if (c == '#')
-                nElementSize = 1;
-            else if (c == 'x' || c == 'y' || c == 'w' || c == 'h')
-                nElementSize = 3;
-            else
-                nElementSize = 2;
-
             std::stringstream ssa;
             ssa << c;
-            for (int32_t i = 1; i < nElementSize; i++)
+
+            std::string sKeys = "xywh";
+
+            if (sKeys.find(c) != std::string::npos)
             {
                 ss.get(c);
-                ssa << c;
+                while(sKeys.find(c) == std::string::npos && c != 't')
+                {
+                    ssa << c;
+                    ss.get(c);
+                }
+
+                vecRoomStr.push_back(ssa.str());
+                continue;
             }
-            vecRoomStr.push_back(ssa.str());
+            else if (c == 't')
+            {
+                ss.get(c);
+                continue;
+            }
+            else
+            {
+                int32_t nElementSize = c == '#' ? 1 : 2;
+                bool bEOF = false;
+                for (int32_t i = 1; i < nElementSize; i++)
+                {
+                    ss.get(c);
+                    ssa << c;
+                }
+
+                vecRoomStr.push_back(ssa.str());
+
+                if (!ss.get(c))
+                    break;
+
+                if (bEOF)
+                    break;
+            }
         }
 
         vecWorld.push_back(vecRoomStr);
@@ -526,18 +548,41 @@ void Ship::LoadFromFile(const char* cFilename)
         vecRooms.push_back(std::make_shared<Room>(false));
         std::stringstream ss;
         std::stringstream ssa;
-        ss << vecWorld[n][0][1] << vecWorld[n][0][2];
-        ssa << std::hex << ss.str();
-        ssa >> vecRooms[n]->vUpperLeftPos.x;
+
+        if (vecWorld[n][0][1] == '-')
+        {
+            ss << vecWorld[n][0][2] << vecWorld[n][0][3];
+            ssa << std::hex << ss.str();
+            ssa >> vecRooms[n]->vUpperLeftPos.x;
+            vecRooms[n]->vUpperLeftPos.x = -vecRooms[n]->vUpperLeftPos.x;
+        }
+        else
+        {
+            ss << vecWorld[n][0][1] << vecWorld[n][0][2];
+            ssa << std::hex << ss.str();
+            ssa >> vecRooms[n]->vUpperLeftPos.x;
+        }
+
 
         ss.str("");
         ssa.str("");
         ss.clear();
         ssa.clear();
 
-        ss << vecWorld[n][1][1] << vecWorld[n][1][2];
-        ssa << std::hex << ss.str();
-        ssa >> vecRooms[n]->vUpperLeftPos.y;
+        if (vecWorld[n][1][1] == '-')
+        {
+            ss << vecWorld[n][1][2] << vecWorld[n][1][3];
+            ssa << std::hex << ss.str();
+            ssa >> vecRooms[n]->vUpperLeftPos.y;
+            vecRooms[n]->vUpperLeftPos.y = -vecRooms[n]->vUpperLeftPos.y;
+        }
+        else
+        {
+            ss << vecWorld[n][1][1] << vecWorld[n][1][2];
+            ssa << std::hex << ss.str();
+            ssa >> vecRooms[n]->vUpperLeftPos.y;
+        }
+
 
         /*****************************/
         /*    Read dimension data    */
@@ -613,10 +658,5 @@ void Ship::LoadFromFile(const char* cFilename)
                 nCounter++;
             }
         }
-
-        std::cout << "Room " << n << " tile counter: " << nCounter << std::endl;
-        std::cout << "Room " << n << " tile size: " << vecRooms[n]->vecTiles.size() << std::endl;
     }
-
-    std::cout << "Number of rooms: " << vecRooms.size() << std::endl;
 }
