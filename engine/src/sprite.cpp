@@ -33,7 +33,6 @@ void Sprite::Draw(SpriteRenderer &cRenderer,
                   glm::vec2 vPos, glm::vec2 vScale,
                   glm::vec2 vSizeInSheet, glm::vec2 vOffset)
 {
-    vScale *= BASE_TILE_SIZE;
     vOffset *= vSizeInSheet;
 
     Texture2D t = ResourceManager::GetTexture(sTexName);

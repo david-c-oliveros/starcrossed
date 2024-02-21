@@ -30,6 +30,8 @@ class Character : public Entity
         void ConfigAnimatedSprite(std::string sSpriteName, uint32_t nNumFrames, uint32_t nTicksPerFrame,
                                   glm::vec2 vStart, glm::vec2 vFrameSize, glm::vec2 vFrameOffset,
                                   glm::vec2 vSpriteScalar = glm::vec2(1.0f));
+
+        void SetAnimatedSpritePosOffset(std::string sSpriteName, glm::vec2 vPosOffset);
         void SetState(CharacterState _eState);
         void SetDir(Direction _eDir);
         void StartSpriteAnim();
@@ -55,5 +57,8 @@ class Character : public Entity
 
     private:
         std::string m_sCurSpriteName;
+
+
+    protected:
         float m_fMoveSpeedScalar;
 };

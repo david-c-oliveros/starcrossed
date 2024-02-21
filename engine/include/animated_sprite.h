@@ -15,6 +15,9 @@ class AnimatedSprite : public Sprite
         void CreateFrames(uint32_t _nNumFrames, uint32_t nTicksPerFrame,
                           glm::vec2 _vStart, glm::vec2 _vFrameSizeInSheet, glm::vec2 _vFrameOffset,
                           glm::vec2 _vScalar = glm::vec2(1.0f));
+
+        glm::vec2 GetPosOffset();
+        void SetPosOffset(glm::vec2 vPosOffset);
         void SetAnimRate(uint32_t nTicksPerFrame);
         void StartAnim();
         void Update();
@@ -32,6 +35,7 @@ class AnimatedSprite : public Sprite
         glm::vec2 m_vFrameSizeInSheet;
         glm::vec2 m_vFrameOffset;
         glm::vec2 m_vScalar;
+        glm::vec2 m_vPosOffset;
 
         uint32_t nNumFrames;
         uint32_t nCurFrame = 1;

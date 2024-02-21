@@ -36,6 +36,12 @@ App::~App()
 /**************************/
 bool App::Create(const char* str)
 {
+    std::string sInput;
+    if (str == nullptr)
+        sInput = "default";
+    else
+        sInput = std::string(str);
+
     if (!GLInit())
         return false;
 
@@ -44,10 +50,16 @@ bool App::Create(const char* str)
 
     LoadResources();
 
-    std::map<std::string, int32_t> mMode = {{ "edit", 0 }, { "play", 1 }};
+    std::map<std::string, int32_t> mMode = {{ "edit", 0 }, { "play", 1 }, { "default", -1 }};
 
-    switch(mMode[std::string(str)])
+    switch(mMode[sInput])
     {
+        case(-1):
+        {
+            SetGameState(GameState::PLAY);
+            break;
+        }
+
         case(0):
         {
             SetGameState(GameState::LEVEL_EDIT);
@@ -89,6 +101,8 @@ bool App::Create(const char* str)
     glm::vec3 vViewPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 vOrigin = glm::vec3(0.0f);
     view = glm::lookAt(vViewPos, vOrigin, glm::vec3(0, 1, 0));
+
+    srand(time(0));
 
     return true;
 }
@@ -192,6 +206,7 @@ bool App::Update()
     UpdateCursorTile();
 
     pPlayer->Update();
+    pNPC->Update();
     cShip.UpdateRooms();
 
     RenderApp();
@@ -243,7 +258,7 @@ bool App::Update()
 
 void App::UpdateCursorTile()
 {
-    glm::vec2 vCursorTileFloat = GetCursorWorldPos() / BASE_TILE_SIZE;
+    glm::vec2 vCursorTileFloat = GetCursorWorldPos();
     m_vCursorTile.x = vCursorTileFloat.x < 0.0 ? (int32_t)(vCursorTileFloat.x - 1) : (int32_t(vCursorTileFloat.x));
     m_vCursorTile.y = vCursorTileFloat.y < 0.0 ? (int32_t)(vCursorTileFloat.y - 1) : (int32_t(vCursorTileFloat.y));
     m_vecThisDebugInfo[1] = "Current cursor tile: " + glm::to_string(m_vCursorTile);
@@ -294,7 +309,13 @@ void App::RenderApp()
         {
 
 //            pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
+
+            cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)pNPC->GetMoveGoal()), cTileWorld.GetWorldScale());
+            cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)pNPC->vWorldPos), cTileWorld.GetWorldScale());
+            cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)m_vCursorTile), cTileWorld.GetWorldScale());
+
             pPlayer->Draw(cRenderer, cTileWorld);
+            pNPC->Draw(cRenderer, cTileWorld);
 
             break;
         }
@@ -466,6 +487,9 @@ void App::LoadResources()
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-7.png", true, "rock_idle_left");
     ResourceManager::LoadTexture("../../res/asset_packs/TopDown_RockBoss_EBrosAssets/TopDown_RockBoss_EBrosAssets/idle/spritesheet-8.png", true, "rock_idle_right");
 
+    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Wizzard/Idle/Idle-Sheet.png", true, "wizard_idle");
+    ResourceManager::LoadTexture("../../res/asset_packs/Pixel Crawler - FREE - 1.8/Heroes/Wizzard/Run/Run-Sheet.png", true, "wizard_walk");
+
     ResourceManager::LoadTexture("../../res/Space Background.png", true, "bg_space_01");
     ResourceManager::LoadTexture("../../res/Outline.png", true, "outline_sprite");
 
@@ -498,13 +522,12 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_13.txt"))
+            if (!cShip.Create(eGameState, "world_14.txt"))
                 return false;
             break;
         }
     }
 
-    //cShip = std::make_unique<Ship>();
     m_vecAllDebugInfo.push_back(&cShip.vecDebugInfo);
 
     cCursorTileSprite.SetColor(glm::vec3(0.15f, 0.25f, 0.40f));
@@ -512,6 +535,12 @@ bool App::ConfigEntities()
     pBGSprite = std::make_unique<Sprite>("bg_space_01");
 
     m_vecAllDebugInfo.push_back(&cTileWorld.vecDebugInfo);
+
+    /*********************************/
+    /*                               */
+    /*        L:Player Config        */
+    /*                               */
+    /*********************************/
 
     pPlayer = std::make_unique<Player>(glm::vec2(1.0f, 2.0f));
 
@@ -544,16 +573,45 @@ bool App::ConfigEntities()
     pPlayer->SetState(CharacterState::IDLE);
     pPlayer->StartSpriteAnim();
 
+    /******************************/
+    /*                            */
+    /*        L:NPC Config        */
+    /*                            */
+    /******************************/
+    pNPC = std::make_unique<CrewMember>(glm::vec2(1.0f, 4.0f));
+//    pNPC = new Character(glm::vec2(1.0f, 4.0f));
+
+    pNPC->AddAnimatedSprite("wizard_idle", "idle_right");
+    pNPC->AddAnimatedSprite("wizard_idle", "idle_left");
+    pNPC->AddAnimatedSprite("wizard_walk", "walk_right");
+    pNPC->AddAnimatedSprite("wizard_walk", "walk_left");
+
+    nTPF = 8;
+    nNumFrames = 4;
+    pNPC->ConfigAnimatedSprite("idle_right", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 4.0f, 1.0f), glm::vec2(1.0f / 4.0f, 1.0f), glm::vec2(1.0f));
+    pNPC->ConfigAnimatedSprite("idle_left", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 4.0f, 1.0f), glm::vec2(1.0f / 4.0f, 1.0f), glm::vec2(-1.0f, 1.0f));
+
+    nTPF = 6;
+    nNumFrames = 6;
+    pNPC->ConfigAnimatedSprite("walk_right", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 6.0f, 1.0f), glm::vec2(1.0f / 6.0f, 1.0f), glm::vec2(2.0f));
+    pNPC->ConfigAnimatedSprite("walk_left", nNumFrames, nTPF, glm::vec2(0), glm::vec2(1.0f / 6.0f, 1.0f), glm::vec2(1.0f / 6.0f, 1.0f), glm::vec2(-2.0f, 2.0f));
+
+    pNPC->SetAnimatedSpritePosOffset("idle_left", glm::vec2(1.0f, 0.0f));
+    pNPC->SetAnimatedSpritePosOffset("idle_right", glm::vec2(1.0f, 0.0f));
+
+    pNPC->SetAnimatedSpritePosOffset("walk_left", glm::vec2(1.5f, -1.0f));
+    pNPC->SetAnimatedSpritePosOffset("walk_right", glm::vec2(1.5f, -1.0f));
+
+    pNPC->SetMoveSpeedScalar(0.05f);
+    pNPC->SetState(CharacterState::WALK);
+    pNPC->SetDir(Direction::LEFT);
+    pNPC->SetMoveGoal(glm::ivec2(8, 14));
+    pNPC->StartSpriteAnim();
+
     m_vecAllDebugInfo.push_back(&pPlayer->vecDebugInfo);
+    m_vecAllDebugInfo.push_back(&pNPC->vecDebugInfo);
 
     return true;
-}
-
-
-
-void App::PrintVar(int32_t var)
-{
-    std::cout << var << std::endl;
 }
 
 

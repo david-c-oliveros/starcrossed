@@ -23,6 +23,7 @@
 #include "ship.h"
 #include "character.h"
 #include "player.h"
+#include "crew_member.h"
 #include "event.h"
 
 #include "ui.h"
@@ -58,8 +59,6 @@ class App
         void ProcessInput();
         void ProcessMouseInput();
 
-        void PrintVar(int32_t var);
-
         glm::vec2 GetCursorScreenPos();
         glm::vec2 GetCursorWorldPos();
 
@@ -91,11 +90,12 @@ class App
         GameState eGameState = GameState::PLAY;
 
         bool bShowDemoWindow = false;
-        bool bShowDebugPanel = true;
+        bool bShowDebugPanel = false;
         bool bShowInfoPanel  = true;
         bool bFullscreen = false;
 
         std::unique_ptr<Player> pPlayer;
+        std::unique_ptr<CrewMember> pNPC;
         Ship cShip;
 
     private:

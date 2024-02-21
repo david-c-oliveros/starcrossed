@@ -25,8 +25,7 @@ Character::~Character()
 void Character::Draw(SpriteRenderer &cRenderer, TileWorld &cTileWorld)
 {
     vecDebugInfo[2] = "vWorldPos: " + glm::to_string(vWorldPos);
-    glm::vec2 vAbsolutePos(vWorldPos * BASE_TILE_SIZE);
-    glm::vec2 vScreenPos = cTileWorld.WorldToScreen(vAbsolutePos);
+    glm::vec2 vScreenPos = cTileWorld.WorldToScreen(vWorldPos + mSprites.find(m_sCurSpriteName)->second.GetPosOffset());
     mSprites.find(m_sCurSpriteName)->second.Draw(cRenderer, vScreenPos, cTileWorld.GetWorldScale());
 }
 
@@ -43,6 +42,13 @@ void Character::ConfigAnimatedSprite(std::string sSpriteName, uint32_t nNumFrame
                                      glm::vec2 vFrameSize, glm::vec2 vFrameOffset, glm::vec2 vSpriteScalar)
 {
     mSprites.find(sSpriteName)->second.CreateFrames(nNumFrames, nTicksPerFrame, vStart, vFrameSize, vFrameOffset, vSpriteScalar);
+}
+
+
+
+void Character::SetAnimatedSpritePosOffset(std::string sSpriteName, glm::vec2 vPosOffset)
+{
+    mSprites.find(sSpriteName)->second.SetPosOffset(vPosOffset);
 }
 
 

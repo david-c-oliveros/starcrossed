@@ -25,6 +25,21 @@ void AnimatedSprite::CreateFrames(uint32_t _nNumFrames, uint32_t nTicksPerFrame,
     m_vFrameSizeInSheet = _vFrameSizeInSheet;
     m_vFrameOffset = _vFrameOffset;
     m_vScalar = _vScalar;
+    m_vPosOffset = glm::vec2(0.0f);
+}
+
+
+
+glm::vec2 AnimatedSprite::GetPosOffset()
+{
+    return m_vPosOffset;
+}
+
+
+
+void AnimatedSprite::SetPosOffset(glm::vec2 vPosOffset)
+{
+    m_vPosOffset = vPosOffset;
 }
 
 
@@ -65,7 +80,6 @@ void AnimatedSprite::Update()
 void AnimatedSprite::Draw(SpriteRenderer &cRenderer,
                           glm::vec2 vPos, glm::vec2 vScale)
 {
-    vScale *= BASE_TILE_SIZE;
     glm::vec2 vCurOffset = m_vStart + glm::vec2(m_vFrameOffset.x * nCurFrame, 0.0f);
 
     Texture2D t = ResourceManager::GetTexture(sTexName);
