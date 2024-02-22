@@ -16,6 +16,7 @@ struct Tile
     glm::vec2 vWorldPos;
     glm::vec2 vTexOffset;
     bool bEmpty = true;
+    bool bSolid = false;
 };
 
 

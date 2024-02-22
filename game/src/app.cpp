@@ -311,7 +311,6 @@ void App::RenderApp()
 //            pBGSprite->Draw(cRenderer, glm::vec2(0.0f), glm::vec2(vScreenSize.x));
 
             cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)pNPC->GetMoveGoal()), cTileWorld.GetWorldScale());
-            cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)pNPC->vWorldPos), cTileWorld.GetWorldScale());
             cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)m_vCursorTile), cTileWorld.GetWorldScale());
 
             pPlayer->Draw(cRenderer, cTileWorld);
@@ -337,9 +336,9 @@ void App::RenderApp()
             }
 
             if (m_bErase)
-                cCursorTileSprite.DrawColored(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale());
+                cCursorTileSprite.DrawColored(cRenderer, cTileWorld.WorldToScreen((glm::vec2)m_vCursorTile), cTileWorld.GetWorldScale());
             else if (!m_bShiftHeld)
-                cShip.pSpriteSpaceship->Draw(cRenderer, (glm::vec2)m_vCursorTile * cTileWorld.GetWorldScale() - cTileWorld.GetWorldOffset() * cTileWorld.GetWorldScale(), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
+                cShip.pSpriteSpaceship->Draw(cRenderer, cTileWorld.WorldToScreen((glm::vec2)m_vCursorTile), cTileWorld.GetWorldScale(), glm::vec2(0.1f), cShip.aTexOffsets[cShip.nCurTexOffset]);
 
             break;
         }
@@ -513,7 +512,7 @@ bool App::ConfigEntities()
     {
         case(GameState::LEVEL_EDIT):
         {
-            if (!cShip.Create(eGameState))
+            if (!cShip.Create(eGameState, "world_14.txt"))
                 return false;
 
             m_pSelectedRoom = cShip.vecRooms[0];
@@ -522,7 +521,7 @@ bool App::ConfigEntities()
 
         case(GameState::PLAY):
         {
-            if (!cShip.Create(eGameState, "world_14.txt"))
+            if (!cShip.Create(eGameState, "world_20.txt"))
                 return false;
             break;
         }
@@ -600,12 +599,12 @@ bool App::ConfigEntities()
     pNPC->SetAnimatedSpritePosOffset("idle_right", glm::vec2(1.0f, 0.0f));
 
     pNPC->SetAnimatedSpritePosOffset("walk_left", glm::vec2(1.5f, -1.0f));
-    pNPC->SetAnimatedSpritePosOffset("walk_right", glm::vec2(1.5f, -1.0f));
+    pNPC->SetAnimatedSpritePosOffset("walk_right", glm::vec2(-0.5f, -1.0f));
 
     pNPC->SetMoveSpeedScalar(0.05f);
     pNPC->SetState(CharacterState::WALK);
     pNPC->SetDir(Direction::LEFT);
-    pNPC->SetMoveGoal(glm::ivec2(8, 14));
+    pNPC->SetMoveGoal(pNPC->vWorldPos);
     pNPC->StartSpriteAnim();
 
     m_vecAllDebugInfo.push_back(&pPlayer->vecDebugInfo);

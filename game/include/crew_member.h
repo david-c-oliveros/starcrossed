@@ -20,6 +20,7 @@ class CrewMember : public Character
 
     private:
         glm::vec2 calcMoveVec();
+        Direction calcSpriteDir(glm::vec2 _vMoveVec);
 
 
     private:

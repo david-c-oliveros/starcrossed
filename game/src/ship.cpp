@@ -44,7 +44,10 @@ bool Ship::Create(GameState _eGameState, const char* sFileName)
     {
         case(GameState::LEVEL_EDIT):
         {
-            AddRoom(glm::ivec2(0), glm::ivec2(8));
+            if (strlen(sFileName) != 0)
+                LoadFromFile(sFileName);
+            else
+                AddRoom(glm::ivec2(0), glm::ivec2(8));
             break;
         }
 
@@ -403,16 +406,20 @@ bool Ship::SaveToFile(std::string sFilename)
 
         int32_t vAbsTmp;
 
+        std::cout << "Upper Left: " << glm::to_string(r->vUpperLeftPos) << std::endl;
         ssa << "x";
         vAbsTmp = std::abs(r->vUpperLeftPos.x);
         if (r->vUpperLeftPos.x < 0)
             ssa << "-";
+
         ssa << std::hex << std::setfill('0') << std::setw(2) << vAbsTmp;
 
         ssa << "y";
         vAbsTmp = std::abs(r->vUpperLeftPos.y);
-        if (r->vUpperLeftPos.x < 0)
+
+        if (r->vUpperLeftPos.y < 0)
             ssa << "-";
+
         ssa << std::hex << std::setfill('0') << std::setw(2) << vAbsTmp;
 
         ssa << "w" << std::hex << std::setfill('0') << std::setw(2) << r->vSize.x << "h"

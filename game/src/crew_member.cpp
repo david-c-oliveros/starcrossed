@@ -20,10 +20,10 @@ CrewMember::~CrewMember()
 
 void CrewMember::Update()
 {
-    if ((glm::ivec2)vWorldPos != m_vMoveGoal)
+    if (glm::abs(glm::length(vWorldPos - (glm::vec2)m_vMoveGoal)) > 0.1f)
         MoveTowardGoal();
     else
-        SetMoveGoal((glm::ivec2)glm::diskRand(20.0));
+        SetMoveGoal((glm::ivec2)glm::diskRand(2.0));
 
     Character::Update();
 }
@@ -39,6 +39,7 @@ glm::ivec2 CrewMember::GetMoveGoal()
 
 void CrewMember::SetMoveGoal(glm::ivec2 vGoal)
 {
+    vecDebugInfo[1] = "m_vMoveGoal: " + glm::to_string(m_vMoveGoal);
     m_vMoveGoal = vGoal;
 }
 
@@ -46,7 +47,9 @@ void CrewMember::SetMoveGoal(glm::ivec2 vGoal)
 
 void CrewMember::MoveTowardGoal()
 {
-    vWorldPos += calcMoveVec() * m_fMoveSpeedScalar;
+    glm::vec2 vMoveVec = calcMoveVec();
+    vWorldPos += vMoveVec * m_fMoveSpeedScalar;
+    SetDir(calcSpriteDir(vMoveVec));
 }
 
 
@@ -54,4 +57,16 @@ void CrewMember::MoveTowardGoal()
 glm::vec2 CrewMember::calcMoveVec()
 {
     return glm::normalize((glm::vec2)m_vMoveGoal - vWorldPos);
+}
+
+
+
+Direction CrewMember::calcSpriteDir(glm::vec2 _vMoveVec)
+{
+    // TODO - Update for all four directions
+
+    if (_vMoveVec.x < 0)
+        return Direction::LEFT;
+
+        return Direction::RIGHT;
 }
